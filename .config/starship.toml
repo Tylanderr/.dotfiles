@@ -1,0 +1,19 @@
+add_newline = false
+
+format = """
+$directory\
+$git_branch\
+$character\
+"""
+
+[directory]
+style = "blue"
+
+[character]
+success_symbol = "[❯](purple)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+
+[git_branch]
+format = "[$branch ]($style)"
+style = "purple"

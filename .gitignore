@@ -1,0 +1,6 @@
+# exlucde
+.config/go/*
+.config/tmux/plugins/*
+.ssh/id_ed25519
+.ssh/known_hosts
+.ssh/known_hosts.old
