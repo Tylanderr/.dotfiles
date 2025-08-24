@@ -117,30 +117,45 @@ alias mvdu='mvn versions:display-dependency-updates'
 alias envs='$(ListEnvs | fzf)'
 alias untrack='git update-index --assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
 alias track='git update-index --no-assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
+alias spa='spring_profiles_active'
 
 # Fuzzy finding navigation
-function sd {
+function select_project {
     selected=$(find ~/projects -mindepth 1 -maxdepth 1 -type d | sort -d | fzf)
     if  [[ $selected ]]; then
 	cd $selected
     fi
 }
 
-function ed {
+function directory_search {
     selected=$(find * -type d -not \( -name node_modules -prune \) | fzf)
     if  [[ $selected ]]; then
 	cd $selected
     fi
 }
 
-function spa {
+function spring_profiles_active {
     export SPRING_PROFILES_ACTIVE="$1"
     echo "SPRING_PROFILES_ACTIVE set to $SPRING_PROFILES_ACTIVE"
 }
 
+function alias_picker {
+    local chosen command
+    # Get list of aliases in "name -> command" format
+    chosen=$(alias | sed -E "s/^alias ([^=]+)='(.*)'$/\1 -> \2/" | fzf --prompt="Pick an alias: ")
+
+    if [[ -n "$chosen" ]]; then
+        # Extract just the command (after '->')
+        command=$(echo "$chosen" | sed -E "s/^[^>]+-> //")
+        eval "$command"
+    fi
+}
+
+
 # Binds
-bind '"\C-f":"sd\n"'
-bind '"\C-g":"ed\n"'
+bind -x '"\C-f":"select_project"'
+bind -x '"\C-g":"directory_search"'
+bind -x '"\C-e":"alias_picker"'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
