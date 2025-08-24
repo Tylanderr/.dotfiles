@@ -115,8 +115,8 @@ alias mvdu='mvn versions:display-dependency-updates'
 
 # Envs
 alias envs='$(ListEnvs | fzf)'
-alias untrack='git update-index --assume-unchanged ~/.bashrc.d/envrc ~/connections/connections.json'
-alias track='git update-index --no-assume-unchanged ~/.bashrc.d/envrc ~/connections/connections.json'
+alias untrack='git update-index --assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
+alias track='git update-index --no-assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
 
 # Fuzzy finding navigation
 function sd {
