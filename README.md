@@ -7,12 +7,6 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install ca-certificates
 ```
-## Dotfiles
-```
-cd ~ && git clone git@github.com:Tylander732/.dotfiles.git
-cd .dotfiles/
-stow .
-```
 ## Install CLI Tools and build dependencies
 ```
 sudo apt install stow
@@ -23,6 +17,12 @@ sudo apt install fd-find
 sudo apt install ansible -y
 sudo apt install python3
 sudo apt install gcc
+```
+## Dotfiles
+```
+cd ~ && git clone git@github.com:Tylander732/.dotfiles.git
+cd .dotfiles/
+stow .
 ```
 ## Install nvm, npm
 - Install nvm
