@@ -140,19 +140,18 @@ function spa {
 
 function ap {
     local chosen command
-    # Get list of aliases in "name -> command" format
-    chosen=$(alias | sed -E "s/^alias ([^=]+)='(.*)'$/\1 -> \2/" | fzf --prompt="Pick an alias: ")
+
+    chosen=$(alias | fzf)
 
     if [[ -n "$chosen" ]]; then
-        # Extract just the command (after '->')
-        command=$(echo "$chosen" | sed -E "s/^[^>]+-> //")
+        command=$(echo "$chosen" | sed -E "s/^alias [^=]+='(.*)'$/\1/")
         eval "$command"
     fi
 }
 
 # Binds
-bind '"\C-f":"sd\n"'
-bind '"\C-g":"ed\n"'
+bind '"\C-f":"sd\n clear\n"'
+bind '"\C-g":"ed\n clear\n"'
 bind '"\C-e":"ap\n"'
 
 # Add an "alert" alias for long running commands.  Use like so:
