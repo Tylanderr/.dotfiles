@@ -71,7 +71,7 @@ case "$TERM" in
     *)
         ;;
 esac
-#
+
 # Fuzzy finding navigation
 function select_project {
     selected=$(find ~/projects -mindepth 1 -maxdepth 1 -type d | sort -d | fzf)
@@ -133,6 +133,7 @@ fi
 
 # Alias
 alias ls='eza -l'
+alias ll='eza -alF'
 alias cl="clear"
 alias shutdown='wsl.exe --shutdown'
 alias proj="cd ~/projects"
@@ -158,6 +159,19 @@ alias mci='mvn clean install'
 alias mvdu='mvn versions:display-dependency-updates'
 alias spa='spring_profile_active'
 
+# Ansible-vault
+alias ave='ansible-vault encrypt'
+alias avd='ansible-vault decrypt'
+
+# Docker
+alias dip='docker image pull'
+alias dcu='docker compose up'
+alias dcd='docker compose down'
+alias dps='docker ps'
+alias drm='docker rm'
+alias drun='docker run'
+alias dstop='docker stop'
+
 # Envs
 alias envs='$(ListEnvs | fzf)'
 alias untrack='git update-index --assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
@@ -167,19 +181,6 @@ alias track='git update-index --no-assume-unchanged ~/.dotfiles/.bashrc.d/envrc 
 bind '"\C-f":"wrap_sp\n"'
 bind '"\C-g":"wrap_ds\n"'
 bind '"\C-e":"alias_picker\n"'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -208,7 +209,6 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 export PATH=$PATH:/usr/share/python3
 
 export EDITOR="nvim"
-export ATAC_KEY_BINDINGS="$HOME/.config/atac_keybindings.toml"
 
 # Source config files from the bashrc config drop directory
 if [ -d "$HOME/.bashrc.d" ]; then
