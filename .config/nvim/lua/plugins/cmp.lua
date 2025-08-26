@@ -30,12 +30,26 @@ return {
         cmp.setup { enabled = true }
       end)
 
+      vim.keymap.set("n", "<leader>co", function()
+        cmp.setup { enabled = false }
+      end)
+
+      vim.keymap.set("n", "<leader>ci", function()
+        cmp.setup { enabled = true }
+      end)
+
       cmp.setup {
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
           end,
         },
+
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
+
         completion = { completeopt = 'menu,menuone,noinsert' },
 
         cmp.setup.cmdline('/', {
@@ -66,24 +80,24 @@ return {
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<C-y>'] = cmp.mapping.confirm { select = true },
 
-          ['<C-Space>'] = cmp.mapping.complete {},
-
-          ['<C-l>'] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
+          -- TODO: I'm not sure about the keymap for this
+          ['K'] = cmp.mapping(function(fallback)
+            if cmp.visible_docs() then
+              cmp.close_docs()
+            elseif cmp.visible() then
+              cmp.open_docs()
+            else
+              fallback()
             end
-          end, { 'i', 's' }),
-          ['<C-h>'] = cmp.mapping(function()
-            if luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            end
-          end, { 'i', 's' }),
+          end),
         },
+
         sources = {
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
         },
+
         cmp.setup.filetype({ "sql" }, {
           sources = {
             { name = "vim-dadbod-completion" },
