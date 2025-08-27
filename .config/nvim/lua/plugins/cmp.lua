@@ -45,6 +45,12 @@ return {
           end,
         },
 
+        view = {
+          docs = {
+            auto_open = false
+          }
+        },
+
         window = {
           completion = cmp.config.window.bordered(),
           documentation = cmp.config.window.bordered(),
@@ -80,14 +86,11 @@ return {
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<C-y>'] = cmp.mapping.confirm { select = true },
 
-          -- TODO: I'm not sure about the keymap for this
-          ['K'] = cmp.mapping(function(fallback)
+          ['<C-g>'] = cmp.mapping(function()
             if cmp.visible_docs() then
               cmp.close_docs()
-            elseif cmp.visible() then
-              cmp.open_docs()
             else
-              fallback()
+              cmp.open_docs()
             end
           end),
         },

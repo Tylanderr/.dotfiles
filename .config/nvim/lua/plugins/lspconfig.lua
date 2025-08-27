@@ -3,7 +3,7 @@ return {
     'neovim/nvim-lspconfig',
     lazy = false,
     dependencies = {
-      { 'williamboman/mason.nvim',           version = "^1.0.0",    opts = {} },
+      { 'williamboman/mason.nvim',           version = "^1.0.0",    opts = { ui = { border = "rounded" } } },
       { 'williamboman/mason-lspconfig.nvim', version = "^1.0.0" },
       { 'folke/lazydev.nvim',                ft = "lua",            opts = {} },
       { 'deathbeam/lspecho.nvim',            opts = { echo = true } },
@@ -42,7 +42,7 @@ return {
         end
       end
 
-      local work_flag = false
+      local work_flag = true
 
       local active = {
         'html',

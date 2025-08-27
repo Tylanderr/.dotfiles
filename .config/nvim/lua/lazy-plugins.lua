@@ -1,21 +1,8 @@
 require('lazy').setup({
-  { 'tpope/vim-sleuth',      event = "VeryLazy", },
-  { 'windwp/nvim-autopairs', event = "VeryLazy", opts = {} },
-
-  require 'plugins/snacks',
-  require 'plugins/noice',
-  require 'plugins/oil',
-  require 'plugins/tokyonight',
-  require 'plugins/lspconfig',
-  require 'plugins/cmp',
-  require 'plugins/neogit',
-  require 'plugins/todo-comments',
-  require 'plugins/trouble',
-  require 'plugins/mini',
-  require 'plugins/treesitter',
-  require 'plugins/harpoon',
-  require 'plugins/refactoring',
-  require 'plugins/lualine',
-  require 'plugins/java',
-  require 'plugins/dadbod',
+  spec = {
+    { import = "plugins" },
+  },
+  ui = {
+    border = "rounded"
+  },
 })
