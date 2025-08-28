@@ -1,6 +1,10 @@
 # TODO
 Ansible playbook for setup
 # Environment Setup
+## Correctly set hostname
+```
+sudo hostname desktop
+```
 ## First Run
 ```
 sudo apt-get update

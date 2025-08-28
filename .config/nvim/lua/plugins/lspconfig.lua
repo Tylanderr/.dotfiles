@@ -42,8 +42,6 @@ return {
         end
       end
 
-      local work_flag = true
-
       local active = {
         'html',
         'lua_ls',
@@ -62,10 +60,12 @@ return {
         'nginx_language_server',
       }
 
-      if work_flag then
+      if vim.fn.hostname() == "desktop" then
+        tableMerge(active, home_servers)
+      elseif vim.fn.hostname() == "laptop" then
         tableMerge(active, work_servers)
       else
-        tableMerge(active, home_servers)
+        print("Hostname not set correctly. Set to desktop for home, and laptop for work")
       end
 
       for _, server in pairs(active) do
