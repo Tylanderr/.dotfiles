@@ -1,10 +1,15 @@
 # TODO
 Ansible playbook for setup
 # Environment Setup
-## Correctly set hostname
+## Fix hostname if necessary
+Edit /etc/wsl.conf
 ```
-sudo hostname desktop
+[network]
+hostname = tjh
+generateHosts = false
 ```
+- Edit /etc/hosts
+- Edit /etc/hostname
 ## First Run
 ```
 sudo apt-get update
