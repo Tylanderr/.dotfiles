@@ -61,6 +61,7 @@ if [ "$color_prompt" = yes ]; then
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
+
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
@@ -83,7 +84,7 @@ function select_project {
     fi
 }
 
-function wrap_sp {
+function wsp {
     if select_project; then
         clear
     fi
@@ -99,7 +100,7 @@ function directory_search {
     fi
 }
 
-function wrap_ds {
+function wds {
     if directory_search; then
         clear
     fi
@@ -110,12 +111,19 @@ function spring_profile_active {
     echo "SPRING_PROFILES_ACTIVE set to $SPRING_PROFILES_ACTIVE"
 }
 
-function alias_picker {
+function ap {
     local chosen command
     chosen=$(alias | fzf)
     if [[ -n "$chosen" ]]; then
         command=$(echo "$chosen" | sed -E "s/^alias [^=]+='(.*)'$/\1/")
         eval "$command"
+    fi
+}
+
+# Startup dev tmux session
+function dev {
+    if clear; then
+        tmux new-session -s Dev -n nvim
     fi
 }
 
@@ -143,9 +151,6 @@ alias grpo="git remote prune origin"
 
 # Neovim
 alias vim='nvim'
-
-# Startup dev tmux session
-alias dev='tmux new-session -s Dev -n nvim'
 
 # Java stuff
 alias mjr='mvn exec:java'
@@ -178,9 +183,9 @@ alias untrack='git update-index --assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~
 alias track='git update-index --no-assume-unchanged ~/.dotfiles/.bashrc.d/envrc ~/.dotfiles/connections/connections.json'
 
 # Binds
-bind '"\C-f":"wrap_sp\n"'
-bind '"\C-g":"wrap_ds\n"'
-bind '"\C-e":"alias_picker\n"'
+bind '"\C-f":"wsp\n"'
+bind '"\C-g":"wds\n"'
+bind '"\C-e":"ap\n"'
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
