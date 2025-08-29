@@ -44,6 +44,9 @@ return {
       },
       progress = {
         enabled = false
+      },
+      hover = {
+        enabled = false
       }
     },
     commands = {
