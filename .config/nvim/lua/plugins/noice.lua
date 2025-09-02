@@ -25,9 +25,6 @@ return {
 
             -- nvim deprecated messages
             { find = 'is deprecated' },
-
-            -- treesitter error
-            { find = 'nvim__redraw'}
           },
         },
         opts = { skip = true },
