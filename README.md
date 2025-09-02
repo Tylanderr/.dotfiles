@@ -117,3 +117,9 @@ mv go /usr/local/
 sudo apt install openjdk-17-jdk openjdk-17-jre
 sudo apt install maven -y
 ```
+## Angular
+Match LSP to Major version of Angular being used
+```
+npm -g uninstall @angular/language-server
+npm -g install @angular/language-server@<Version>
+```
