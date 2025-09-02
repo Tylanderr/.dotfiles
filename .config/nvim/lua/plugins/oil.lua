@@ -19,7 +19,7 @@ return {
         ["<C-l>"] = false,
         ["<C-c>"] = false,
         ["<C-t>"] = false,
-        ["<C-q>"] = { "actions.close", nowait = true },
+        ["q"] = { "actions.close", nowait = true },
       },
       float = {
         padding = 2,

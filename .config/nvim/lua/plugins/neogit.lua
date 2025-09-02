@@ -35,7 +35,7 @@ return {
           ["j"] = "MoveDown",
           ["k"] = "MoveUp",
           ["o"] = "OpenTree",
-          ["<C-q>"] = "Close",
+          ["q"] = "Close",
           ["<tab>"] = "Toggle",
           ["x"] = "Discard",
           ["s"] = "Stage",

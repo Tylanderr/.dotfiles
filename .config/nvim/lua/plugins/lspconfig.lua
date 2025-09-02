@@ -53,7 +53,7 @@ return {
       }
 
       local work_servers = {
-        'angularls',
+        -- 'angularls',
         'ansiblels',
         'ts_ls',
         'yamlls',

@@ -1,3 +1,17 @@
+---@brief
+---
+--- https://github.com/angular/vscode-ng-language-service
+--- `angular-language-server` can be installed via npm `npm install -g @angular/language-server`.
+---
+--- ```lua
+--- local project_library_path = "/path/to/project/lib"
+--- local cmd = {"ngserver", "--stdio", "--tsProbeLocations", project_library_path , "--ngProbeLocations", project_library_path}
+---
+--- vim.lsp.config('angularls', {
+---   cmd = cmd,
+--- })
+--- ```
+
 -- Angular requires a node_modules directory to probe for @angular/language-service and typescript
 -- in order to use your projects configured versions.
 local root_dir = vim.fn.getcwd()
@@ -48,12 +62,13 @@ local extension_path = vim.fs.normalize(vim.fs.joinpath(ngserver_path, '../../..
 -- angularls will get module by `require.resolve(PROBE_PATH, MODULE_NAME)` of nodejs
 local ts_probe_dirs = vim.iter({ extension_path, default_probe_dir }):join(',')
 local ng_probe_dirs = vim
-    .iter({ extension_path, default_probe_dir })
-    :map(function(p)
-      return vim.fs.joinpath(p, '/@angular/language-server/node_modules')
-    end)
-    :join(',')
+  .iter({ extension_path, default_probe_dir })
+  :map(function(p)
+    return vim.fs.joinpath(p, '/@angular/language-server/node_modules')
+  end)
+  :join(',')
 
+---@type vim.lsp.Config
 return {
   cmd = {
     'ngserver',

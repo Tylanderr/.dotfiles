@@ -27,6 +27,6 @@ gui:
       - "#c0caf5"
 keybinding:
   universal:
-    quit: <c-q>
+    quit: q
     quit-alt1: <disabled>
     return: <c-c>
