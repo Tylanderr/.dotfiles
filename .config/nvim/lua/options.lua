@@ -34,7 +34,12 @@ vim.opt.smartcase = true
 
 vim.opt.splitright = true
 
-vim.opt.formatoptions:remove("o")
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "*",
+	callback = function()
+		vim.opt_local.formatoptions:remove({ 'o' })
+	end,
+})
 
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
