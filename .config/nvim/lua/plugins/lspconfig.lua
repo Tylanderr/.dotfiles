@@ -1,5 +1,4 @@
 return {
-  {
     'neovim/nvim-lspconfig',
     lazy = false,
     dependencies = {
@@ -53,7 +52,7 @@ return {
       }
 
       local work_servers = {
-        -- 'angularls',
+        'angularls',
         'ansiblels',
         'ts_ls',
         'yamlls',
@@ -82,5 +81,4 @@ return {
         virtual_text = not diagnosticVisible,
       })
     end)
-  },
 }
