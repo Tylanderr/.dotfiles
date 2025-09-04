@@ -1,3 +1,18 @@
+local function float_layout()
+  local ui = vim.api.nvim_list_uis()[1]
+  if not ui then
+    return
+  end
+
+  local width = math.floor(ui.width * 0.6)
+  local height = math.floor(ui.height * 0.6)
+  
+  return {
+    height = height,
+    width = width,
+  }
+end
+
 return {
   "NeogitOrg/neogit",
   event = "VeryLazy",
@@ -20,17 +35,16 @@ return {
   config = function()
     require("neogit").setup({
       use_default_keymaps = false,
+      disable_context_highlighting = true,
+      disable_hint = true,
+      floating = float_layout(),
       mappings = {
         commit_editor = {},
         commit_editor_I = {},
         rebase_editor = {},
         rebase_editor_I = {},
         finder = {},
-        -- Setting any of these to `false` will disable the mapping.
-        popup = {
-          ["?"] = "HelpPopup",
-          ["1"] = "CommitPopup",
-        },
+        popup = {},
         status = {
           ["j"] = "MoveDown",
           ["k"] = "MoveUp",
