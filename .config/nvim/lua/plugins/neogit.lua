@@ -4,12 +4,9 @@ local function float_layout()
     return
   end
 
-  local width = math.floor(ui.width * 0.6)
-  local height = math.floor(ui.height * 0.6)
-  
   return {
-    height = height,
-    width = width,
+    height = math.floor(ui.height * 0.7),
+    width = math.floor(ui.width * 0.7),
   }
 end
 

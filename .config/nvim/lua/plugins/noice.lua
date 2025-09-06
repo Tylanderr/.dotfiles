@@ -1,6 +1,17 @@
 return {
   "folke/noice.nvim",
   event = "VeryLazy",
+  dependencies = {
+    { "MunifTanjim/nui.nvim" },
+    {
+      "rcarriga/nvim-notify",
+      opts = {
+        stages = "static",
+        render = "minimal",
+        minimum_width = 10
+      }
+    },
+  },
   opts = {
     routes = {
       {
@@ -55,17 +66,6 @@ return {
     commands = {
       history = {
         view = "popup"
-      }
-    },
-  },
-  dependencies = {
-    { "MunifTanjim/nui.nvim" },
-    {
-      "rcarriga/nvim-notify",
-      opts = {
-        stages = "static",
-        render = "minimal",
-        minimum_width = 10
       }
     },
   },
