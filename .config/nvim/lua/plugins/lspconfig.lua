@@ -73,6 +73,9 @@ return {
   vim.diagnostic.config({
     virtual_text = false,
     underline = false,
+    float = {
+      border = "rounded",
+    }
   }),
 
   vim.keymap.set("n", "<leader>lx", function()
