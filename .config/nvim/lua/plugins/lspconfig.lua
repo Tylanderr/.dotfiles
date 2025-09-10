@@ -2,8 +2,7 @@ return {
   'neovim/nvim-lspconfig',
   lazy = false,
   dependencies = {
-    { 'williamboman/mason.nvim',           version = "^1.0.0",    opts = { ui = { border = "rounded" } } },
-    { 'williamboman/mason-lspconfig.nvim', version = "^1.0.0" },
+    { 'mason-org/mason.nvim',           version = "^1.0.0",    opts = { ui = { border = "rounded" } } },
     { 'folke/lazydev.nvim',                ft = "lua",            opts = {} },
     { 'deathbeam/lspecho.nvim',            opts = { echo = true } },
     { 'hrsh7th/cmp-cmdline' },
