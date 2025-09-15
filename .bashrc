@@ -148,7 +148,7 @@ alias proj="cd ~/projects"
 alias dots="cd ~/.dotfiles/"
 alias lg="lazygit"
 alias grpo="git remote prune origin"
-alias notes="vim ~/vault/obsidian-developer-vault/"
+alias notes="cd ~/vault/obsidian-developer-vault/ && vim ."
 
 # Neovim
 alias vim='nvim'
