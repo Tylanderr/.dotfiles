@@ -31,6 +31,7 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 vim.keymap.set("n", "<leader>nh", "<cmd>noh<CR>")
 vim.keymap.set("n", "<leader>wv", "<cmd>vsplit<CR>")
+vim.keymap.set("n", "<leader>ws", "<cmd>split<CR>")
 
 vim.keymap.set("n", "<leader>tc", "<cmd>tabclose<CR>")
 vim.keymap.set("n", "<leader>tl", "<cmd>tabnext<CR>")
