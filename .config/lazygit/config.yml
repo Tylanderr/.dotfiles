@@ -29,4 +29,3 @@ keybinding:
   universal:
     quit: q
     quit-alt1: <disabled>
-    return: <c-c>
