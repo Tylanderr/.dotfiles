@@ -1,17 +1,38 @@
 return {
-  -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
   'folke/tokyonight.nvim',
-  priority = 1000,   -- Make sure to load this before all the other start plugins.
+  priority = 1000,
   init = function()
-    -- Other styles - 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
     vim.cmd.colorscheme 'tokyonight-storm'
-
-    -- You can configure highlights by doing something like:
     vim.cmd.hi 'Comment gui=none'
   end,
   config = function()
+    local current_scheme = 'tokyonight-storm'
+    local current_transparency = true
+
     require('tokyonight').setup({
-      transparent = true
+      transparent = current_transparency,
     })
+
+    -- Define toggle function
+    local function toggle_colorscheme()
+      if current_scheme == 'tokyonight-storm' then
+        current_scheme = 'tokyonight-day'
+        current_transparency = false
+      else
+        current_scheme = 'tokyonight-storm'
+        current_transparency = true
+      end
+
+      -- Re-setup Tokyonight with new transparency
+      require('tokyonight').setup({
+        transparent = current_transparency,
+      })
+
+      -- Apply the new colorscheme
+      vim.cmd.colorscheme(current_scheme)
+    end
+
+    -- Keybinding to toggle (change '<leader>ut' to whatever you like)
+    vim.keymap.set('n', '<leader>ut', toggle_colorscheme, { desc = 'Toggle Tokyonight Theme' })
   end
 }

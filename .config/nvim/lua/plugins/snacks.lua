@@ -50,7 +50,7 @@ return {
   opts = {
     bigfile = { enabled = true },
     dashboard = {
-      enabled = true,
+      enabled = false,
       preset = {
         keys = {
           { icon = ' ', key = 'f', desc = 'File', action = ":lua Snacks.dashboard.pick('files')" },
