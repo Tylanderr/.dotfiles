@@ -40,5 +40,6 @@ vim.keymap.set("n", "<leader>th", "<cmd>tabprev<CR>")
 vim.keymap.set("n", "qn", "<cmd>cnext<CR>")
 vim.keymap.set("n", "qp", "<cmd>cprev<CR>")
 vim.keymap.set("n", "qc", "<cmd>cclose<CR>")
+vim.keymap.set("n", "qo", "<cmd>copen<CR>")
 
 vim.keymap.set("n", "<leader>sft", "<cmd>lua print(vim.bo.filetype)<CR>")
