@@ -19,6 +19,7 @@ return {
         ["<C-l>"] = false,
         ["<C-c>"] = false,
         ["<C-t>"] = false,
+        ["<C-v>"] = { "actions.select", opts = { vertical = true } },
         ["q"] = { "actions.close", nowait = true },
       },
       float = {
@@ -48,7 +49,7 @@ return {
         end
       }
     })
-    vim.keymap.set("n", "<leader>-", require("oil").open_float)
-    vim.keymap.set("n", "-", "<cmd>Oil<CR>")
+    vim.keymap.set("n", "-", require("oil").open_float)
+    vim.keymap.set("n", "<leader>-", "<cmd>Oil<CR>")
   end,
 }
