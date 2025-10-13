@@ -38,17 +38,26 @@ return {
             { find = 'is deprecated' },
 
             -- treesitter error
-            { find = 'nvim__redraw'},
+            { find = 'nvim__redraw' },
           },
         },
         opts = { skip = true },
+      },
+      {
+        filter = {
+          event = 'notify',
+          any = {
+            { find = 'is deprecated' },
+            { find = 'stack traceback' }
+          }
+        }
       }
     },
     messages = {
       enabled = true
     },
     notify = {
-      enabled = false
+      enabled = true,
     },
     lsp = {
       override = {
