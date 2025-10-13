@@ -34,9 +34,6 @@ return {
             { find = 'Diagnosing -' },
             { find = 'Processing -' },
 
-            -- nvim deprecated messages
-            { find = 'is deprecated' },
-
             -- treesitter error
             { find = 'nvim__redraw' },
           },
@@ -48,7 +45,8 @@ return {
           event = 'notify',
           any = {
             { find = 'is deprecated' },
-            { find = 'stack traceback' }
+            { find = 'stack traceback' },
+            { find = 'No results found' }
           }
         }
       }
