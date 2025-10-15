@@ -147,6 +147,7 @@ alias shutdown='wsl.exe --shutdown'
 alias proj="cd ~/projects"
 alias dots="cd ~/.dotfiles/"
 alias lg="lazygit"
+alias ld="lazydocker"
 alias grpo="git remote prune origin"
 alias notes="cd ~/vault/obsidian-developer-vault/ && vim ."
 
@@ -227,4 +228,3 @@ fi
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 eval "$(starship init bash)"
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
