@@ -50,7 +50,7 @@ return {
   opts = {
     bigfile = { enabled = true },
     dashboard = {
-      enabled = false,
+      enabled = true,
       preset = {
         keys = {
           { icon = ' ', key = 'f', desc = 'File', action = ":lua Snacks.dashboard.pick('files')" },
@@ -78,7 +78,7 @@ return {
       enabled = true,
       sources = {
         files = { layout = palette_layout(), hidden = true },
-        grep = { layout = files_layout() },
+        grep = { layout = files_layout(), hidden = true },
         buffers = { layout = files_layout() },
         grep_word = { layout = files_layout() },
         diagnostics = { layout = files_layout() },
