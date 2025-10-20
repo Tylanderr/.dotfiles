@@ -213,7 +213,7 @@ export PATH=${M2_HOME}/bin:${PATH}
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:/usr/bin/go:/usr/local/go/bin:$GOPATH/bin
 export PATH=$PATH:/usr/share/python3
 
 export EDITOR="nvim"
