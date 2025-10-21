@@ -215,6 +215,7 @@ export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/bin/go:/usr/local/go/bin:$GOPATH/bin
 export PATH=$PATH:/usr/share/python3
+export PATH="${PATH:+${PATH}:}/home/tyler/.fzf/bin:/usr/bin/fzf"
 
 export EDITOR="nvim"
 
@@ -225,6 +226,5 @@ if [ -d "$HOME/.bashrc.d" ]; then
     done
 fi
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
+eval "$(fzf --bash)"
 eval "$(starship init bash)"
