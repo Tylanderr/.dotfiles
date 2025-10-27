@@ -122,5 +122,15 @@ sudo apt install openjdk-17-jdk openjdk-17-jre
 sudo apt install maven -y
 ```
 ## Angular
-Ensure that the desired language server that corresponds to the Angular version is added as a dev dependency in package.json.
-Upon doing 'npm i', angular-lsp will be available for that project.
+Update package.json with language-server dev dependency
+```
+"devDependencies": {
+    "@angular/language-server": "^xxx.x.xx",
+}
+```
+Update tsconfig.json to have strict templating
+```
+"angularCompilerOptions": {
+    "strictTemplate": true
+}
+```
