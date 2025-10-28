@@ -16,6 +16,7 @@ return {
     vim.g.db_ui_use_nerd_fonts = 1
     vim.g.omni_sql_no_default_maps = 1
     vim.g.db_ui_save_location = '~/connections/'
+    vim.keymap.set("n", "<leader>db", "<cmd>tabnew|DBUIToggle<CR>")
 
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "dbout",
