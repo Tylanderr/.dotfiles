@@ -95,7 +95,7 @@ return {
         enabled = false
       },
       filter = function(buf)
-        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason", "hyprlang" }
+        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason" }
         local ft = vim.bo[buf].filetype
         return not vim.tbl_contains(exclude, ft)
       end
@@ -110,5 +110,7 @@ return {
     { "<leader>fh",       function() Snacks.picker.help() end,        desc = "Help Pages" },
     { "<leader>fk",       function() Snacks.picker.keymaps() end,     desc = "Keymaps" },
     { "<leader>u",        function() Snacks.picker.undo() end,        desc = "Undo History" },
+    { "<leader>lg",       function() Snacks.lazygit() end,            desc = "Lazygit" },
+    { "<leader>gs",       function() Snacks.lazygit() end,            desc = "Lazygit" },
   }
 }

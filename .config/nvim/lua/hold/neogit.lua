@@ -15,20 +15,6 @@ return {
   event = "VeryLazy",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    {
-      "sindrets/diffview.nvim",
-      opts = {
-        file_panel = {
-          listing_style = "tree",
-          tree_options = {
-            flatten_dirs = true,
-          },
-          win_config = {
-            width = 50,
-          }
-        }
-      }
-    },
     "tpope/vim-fugitive",
     "folke/snacks.nvim",
   },
@@ -72,7 +58,6 @@ return {
     vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
     vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
     vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
-    vim.keymap.set("n", "<leader>gdm", ":DiffviewOpen ")
 
     vim.api.nvim_create_autocmd("User", {
       pattern = "FugitiveChanged",
