@@ -188,7 +188,6 @@ alias track='git update-index --no-assume-unchanged ~/.dotfiles/.bashrc.d/envrc 
 # Binds
 bind '"\C-f":"wsp\n"'
 bind '"\C-g":"wds\n"'
-bind '"\C-e":"ap\n"'
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
