@@ -2,9 +2,9 @@ return {
   'neovim/nvim-lspconfig',
   lazy = false,
   dependencies = {
-    { 'mason-org/mason.nvim',           version = "^1.0.0",    opts = { ui = { border = "rounded" } } },
-    { 'folke/lazydev.nvim',                ft = "lua",            opts = {} },
-    { 'deathbeam/lspecho.nvim',            opts = { echo = true } },
+    { 'mason-org/mason.nvim',   opts = { ui = { border = "rounded" } } },
+    { 'folke/lazydev.nvim',     ft = "lua",                            opts = {} },
+    { 'deathbeam/lspecho.nvim', opts = { echo = true } },
     { 'hrsh7th/cmp-cmdline' },
     { 'folke/snacks.nvim' },
   },

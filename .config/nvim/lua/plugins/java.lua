@@ -4,17 +4,15 @@ return {
   config = function()
     require('java').setup({
       java_test = {
-        enable = true
+        enable = false
       },
 
       java_debug_adapter = {
-        enable = true,
-        version = '0.58.2'
+        enable = false,
       },
 
       spring_boot_tools = {
         enable = true,
-        version = '1.55.1'
       },
 
       notifications = {
