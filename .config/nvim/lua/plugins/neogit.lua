@@ -56,6 +56,7 @@ return {
     vim.keymap.set('n', '<leader>gb', '<cmd>Git blame<CR>')
     vim.keymap.set("n", "<leader>gp", "<cmd>Git push<CR>")
     vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
+    vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
     vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
     vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
 
