@@ -1,5 +1,4 @@
 gui:
-  screenMode: "half"
   nerdFontsVersion: "3"
   theme:
     activeBorderColor:
@@ -26,4 +25,4 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
-
+      
