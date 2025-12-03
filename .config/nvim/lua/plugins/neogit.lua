@@ -13,6 +13,7 @@ end
 return {
   "NeogitOrg/neogit",
   event = "VeryLazy",
+  commit = "d93d7813cbd7acc44d2b058490c399ab84bf8d21",
   dependencies = {
     "nvim-lua/plenary.nvim",
     "tpope/vim-fugitive",
@@ -55,6 +56,7 @@ return {
     vim.keymap.set("n", "<leader>gt", "<cmd>Neogit<CR>")
     vim.keymap.set('n', '<leader>gb', '<cmd>Git blame<CR>')
     vim.keymap.set("n", "<leader>gp", "<cmd>Git push<CR>")
+    vim.keymap.set("n", "<leader>gP", "<cmd>Git push --force<CR>")
     vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
     vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
     vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
