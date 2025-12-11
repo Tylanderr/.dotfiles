@@ -125,9 +125,8 @@ function ap {
 
 # Startup dev tmux session
 function dev {
-    if clear; then
-        tmux new-session -s Dev -n nvim
-    fi
+    clear
+    tmux new-session -s Dev -n nvim
 }
 
 # enable color support of ls and also add handy aliases
