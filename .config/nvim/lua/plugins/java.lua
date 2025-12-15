@@ -1,6 +1,7 @@
 return {
   'nvim-java/nvim-java',
   ft = "java",
+  version = "v3.0.0",
   config = function()
     require('java').setup({
       java_test = {
