@@ -1,6 +1,3 @@
-# If not running interactively, don't do anything (leave this at the top of this file)
-[[ $- != *i* ]] && return
-
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -128,6 +125,54 @@ function dev {
     clear
     tmux new-session -s Dev -n nvim
 }
+
+function sshs {
+    local cfg="${SSH_CONFIG:-$HOME/.ssh/config}"
+
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "fzf is not installed or not in PATH." >&2
+        return 1
+    fi
+    if [[ ! -f "$cfg" ]]; then
+        echo "SSH config not found: $cfg" >&2
+        return 1
+    fi
+
+    local aliases
+    aliases="$(awk '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*Match[[:space:]]+/ { next }
+        /^[[:space:]]*Host[[:space:]]+/ {
+            line = $0
+            sub(/^[[:space:]]*Host[[:space:]]+/, "", line)
+            n = split(line, toks, /[[:space:]]+/)
+            for (i=1; i<=n; i++) {
+                if (toks[i] ~ /[*?]/) continue
+                    print toks[i]
+                }
+        } ' "$cfg" | sort -u)"
+
+    if [[ -z "$aliases" ]]; then
+        echo "No host aliases found in $cfg" >&2
+        return 1
+    fi
+
+    local list
+    list="$(while IFS= read -r alias; do
+        hn="$(ssh -G "$alias" 2>/dev/null | awk 'tolower($1)=="hostname"{print $2; exit}')"
+        printf "%s\t%s\n" "$alias" "${hn:-"(no explicit HostName; alias used)"}"
+    done <<< "$aliases")"
+
+    local pick alias
+    pick="$(echo "$list" | sort -t $'\t' -k1,1 | awk -F'\t' '{printf "%s -> %s\n", $1, $2}' | FZF_DEFAULT_OPTS="--height=80% --reverse" fzf --prompt="SSH host> ")"
+
+    [[ -z "$pick" ]] && return 0
+    alias="${pick%% -> *}"
+
+    echo "→ ssh $alias"
+    ssh "$alias"
+}
+
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
