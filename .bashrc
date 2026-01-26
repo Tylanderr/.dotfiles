@@ -173,6 +173,22 @@ function sshs {
     ssh "$alias"
 }
 
+declare -A pomo_options
+pomo_options=(
+    ["work"]="50"
+    ["break"]="10"
+)
+
+pomodoro () {
+  if [ -n "$1" -a -n "{pomo_options["$1"]}" ]; then
+  val=$1;
+  timer "${pomo_options["$val"]}m"
+  notify-send "'$val' session done"
+  fi
+}
+
+alias wo="pomodoro 'work'"
+alias br="pomodoro 'break'"
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
