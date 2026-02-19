@@ -33,6 +33,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 vim.opt.splitright = true
+vim.opt.splitbelow = true
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "*",
