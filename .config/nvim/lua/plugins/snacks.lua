@@ -42,8 +42,6 @@ local function files_layout(preview_width, height, width)
   }
 end
 
-local terminal_opened = false
-
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -144,13 +142,6 @@ return {
               height = 0.60,
             },
           })
-          if not terminal_opened then
-            local chan = vim.bo[term.buf].channel
-            vim.defer_fn(function()
-              vim.fn.chansend(chan, { "vim +G +only\r\n" })
-            end, 100)
-          end
-          terminal_opened = true
         end
       end,
       desc = "Open Floating Terminal",
