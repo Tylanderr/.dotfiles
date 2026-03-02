@@ -28,13 +28,21 @@ end
 return {
   "folke/sidekick.nvim",
   opts = {
-    -- add any options here
     cli = {
+      tools = {
+          opencode = {
+            cmd = { "opencode" },
+            env = { OPENCODE_THEME = "system" },
+          },
+      },
       mux = {
         backend = "tmux",
         enabled = true,
       },
       win = {
+        split = {
+          width = 120
+        },
         keys = {
           hide_n = { "q", "false", mode = "n", desc = "hide the terminal window" },
         }
@@ -46,19 +54,10 @@ return {
   },
   keys = {
     {
-      "<tab>",
-      function()
-        -- if there is a next edit, jump to it, otherwise apply it if any
-        if not require("sidekick").nes_jump_or_apply() then
-          return "<Tab>" -- fallback to normal tab
-        end
-      end,
-      expr = true,
-      desc = "Goto/Apply Next Edit Suggestion",
-    },
-    {
       "<c-\\>",
-      function() require("sidekick.cli").toggle() end,
+      function() require("sidekick.cli").toggle({ name = "opencode", focus = true }) end,
+      -- Use below to select provider instead of opening directly to opencode
+      -- function() require("sidekick.cli").toggle() end,
       desc = "Sidekick Toggle",
       mode = { "n", "t", "i", "x" },
     },
