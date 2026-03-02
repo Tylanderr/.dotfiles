@@ -7,6 +7,11 @@ return {
         backend = "tmux",
         enabled = true,
       },
+      win = {
+        keys = {
+          hide_n = { "q", "false", mode = "n", desc = "hide the terminal window" },
+        }
+      }
     },
     nes = {
       enabled = false
