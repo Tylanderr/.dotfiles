@@ -164,7 +164,7 @@ function sshs {
     done <<< "$aliases")"
 
     local pick alias
-    pick="$(echo "$list" | sort -t $'\t' -k1,1 | awk -F'\t' '{printf "%s -> %s\n", $1, $2}' | FZF_DEFAULT_OPTS="--height=80% --reverse" fzf --prompt="SSH host> ")"
+    pick="$(echo "$list" | sort -t $'\t' -k1,1 | awk -F'\t' '{printf "%s -> %s\n", $1, $2}' | fzf --prompt="SSH host> ")"
 
     [[ -z "$pick" ]] && return 0
     alias="${pick%% -> *}"
@@ -173,22 +173,6 @@ function sshs {
     ssh "$alias"
 }
 
-declare -A pomo_options
-pomo_options=(
-    ["work"]="50"
-    ["break"]="10"
-)
-
-pomodoro () {
-  if [ -n "$1" -a -n "{pomo_options["$1"]}" ]; then
-  val=$1;
-  timer "${pomo_options["$val"]}m"
-  notify-send "'$val' session done"
-  fi
-}
-
-alias wo="pomodoro 'work'"
-alias br="pomodoro 'break'"
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -213,6 +197,9 @@ alias lg="lazygit"
 alias ld="lazydocker"
 alias grpo="git remote prune origin"
 alias notes="cd ~/vault/obsidian-developer-vault/ && vim ."
+alias downloads="cd /mnt/c/Users/chq-tylerh/Downloads/"
+alias ccli="copilot login"
+alias ockill="pkill -f opencode; sleep 2; pgrep -f opencode && pkill -9 -f opencode || true"
 
 # Neovim
 alias vim='nvim'

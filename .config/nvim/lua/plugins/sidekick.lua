@@ -32,12 +32,11 @@ return {
       tools = {
         opencode = {
           cmd = { "opencode" },
-          env = { OPENCODE_THEME = "system" },
         },
       },
       mux = {
         backend = "tmux",
-        enabled = false,
+        enabled = true,
       },
       win = {
         split = {
