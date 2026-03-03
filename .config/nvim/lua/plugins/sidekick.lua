@@ -30,14 +30,13 @@ return {
   opts = {
     cli = {
       tools = {
-          opencode = {
-            cmd = { "opencode" },
-            env = { OPENCODE_THEME = "system" },
-          },
+        opencode = {
+          cmd = { "opencode" },
+        },
       },
       mux = {
         backend = "tmux",
-        enabled = true,
+        enabled = false,
       },
       win = {
         split = {
@@ -45,6 +44,7 @@ return {
         },
         keys = {
           hide_n = { "q", "false", mode = "n", desc = "hide the terminal window" },
+          prompt = { "<a-p>", "prompt", mode = "t", desc = "insert prompt or context" }
         }
       }
     },
@@ -56,8 +56,6 @@ return {
     {
       "<c-\\>",
       function() require("sidekick.cli").toggle({ name = "opencode", focus = true }) end,
-      -- Use below to select provider instead of opening directly to opencode
-      -- function() require("sidekick.cli").toggle() end,
       desc = "Sidekick Toggle",
       mode = { "n", "t", "i", "x" },
     },
