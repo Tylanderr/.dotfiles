@@ -1,4 +1,4 @@
----@param opts? { filter?: sidekick.cli.Filter }
+--a-@param opts? { filter?: sidekick.cli.Filter }
 local function sidekick_cli_kill(opts)
   local Cli = require("sidekick.cli")
   local State = require("sidekick.cli.state")
@@ -32,6 +32,7 @@ return {
       tools = {
         opencode = {
           cmd = { "opencode" },
+          env = { OPENCODE_THEME = "system" },
         },
       },
       mux = {
@@ -43,8 +44,13 @@ return {
           width = 120
         },
         keys = {
-          hide_n = { "q", "false", mode = "n", desc = "hide the terminal window" },
-          prompt = { "<a-p>", "prompt", mode = "t", desc = "insert prompt or context" }
+          prompt    = { "<a-p>", "prompt", mode = "t", desc = "insert prompt or context" },
+          hide_n    = false,
+          files     = false,
+          nav_left  = false,
+          nav_down  = false,
+          nav_up    = false,
+          nav_right = false,
         }
       }
     },
