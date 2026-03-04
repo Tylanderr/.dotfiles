@@ -121,7 +121,7 @@ return {
   },
   settings = {
     telemetry = {
-      telemetryLevel = 'off',
+      enabled = false,
     },
   },
   on_attach = function(client, bufnr)
