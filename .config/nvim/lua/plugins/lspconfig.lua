@@ -57,7 +57,7 @@ return {
       'yamlls',
       'nginx_language_server',
       'pylsp',
-      'copilot'
+      -- 'copilot'
     }
 
     if vim.fn.hostname() == "tjh" then
