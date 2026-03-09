@@ -47,9 +47,38 @@ return {
           ["U"] = "UnstageStaged",
           ["Y"] = "YankSelected",
           ["<c-r>"] = "RefreshBuffer",
-          ["<cr>"] = "GoToFile",
         },
       },
+    })
+
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "NeogitStatus",
+      callback = function(ev)
+        vim.keymap.set("n", "<cr>", function()
+          local instance = require("neogit.buffers.status").instance()
+          if not instance then return end
+
+          local item = instance.buffer.ui:get_item_under_cursor()
+          if item and item.absolute_path then
+            -- File: close float, then open in vsplit
+            local path = item.absolute_path
+            instance:close()
+            vim.schedule(function()
+              vim.cmd("edit " .. vim.fn.fnameescape(path))
+            end)
+            return
+          end
+
+          -- Commit: close float, then open commit view
+          local ref = instance.buffer.ui:get_yankable_under_cursor()
+          if ref then
+            instance:close()
+            vim.schedule(function()
+              require("neogit.buffers.commit_view").new(ref):open()
+            end)
+          end
+        end, { buffer = ev.buf, silent = true })
+      end,
     })
 
     vim.keymap.set("n", "<leader>gs", "<cmd>Neogit kind=floating<CR>")
