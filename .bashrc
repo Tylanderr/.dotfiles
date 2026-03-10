@@ -199,7 +199,7 @@ alias grpo="git remote prune origin"
 alias notes="cd ~/vault/obsidian-developer-vault/ && vim ."
 alias downloads="cd /mnt/c/Users/chq-tylerh/Downloads/"
 alias ccli="copilot login"
-alias ockill="pkill -f opencode; sleep 2; pgrep -f opencode && pkill -9 -f opencode || true"
+alias ock="pkill -f opencode; sleep 2; pgrep -f opencode && pkill -9 -f opencode || true"
 
 # Neovim
 alias vim='nvim'
@@ -265,6 +265,7 @@ export GOPATH=$HOME/go
 export PATH=$PATH:/usr/bin/go:/usr/local/go/bin:$GOPATH/bin
 export PATH=$PATH:/usr/share/python3
 export PATH="${PATH:+${PATH}:}/home/tyler/.fzf/bin:/usr/bin/fzf"
+export PATH=/home/tyler/.opencode/bin:$PATH
 
 export EDITOR="nvim"
 
