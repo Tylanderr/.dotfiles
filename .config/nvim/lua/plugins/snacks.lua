@@ -100,7 +100,7 @@ return {
         enabled = false
       },
       filter = function(buf)
-        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason", "sidekick_terminal" }
+        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason", "sidekick_terminal", "opencode", "opencode_output" }
         local ft = vim.bo[buf].filetype
         return not vim.tbl_contains(exclude, ft)
       end
