@@ -49,7 +49,7 @@ return {
   ---@type snacks.Config
   opts = {
     bigfile = { enabled = true },
-    terminal = { 
+    terminal = {
       win = {
         position = "float"
       }
@@ -100,21 +100,22 @@ return {
         enabled = false
       },
       filter = function(buf)
-        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason", "sidekick_terminal", "opencode", "opencode_output" }
+        local exclude = { "java", "typescript", "markdown", "go", "lazy", "snacks_dashboard", "dbout", "mason",
+          "sidekick_terminal", "opencode", "opencode_output" }
         local ft = vim.bo[buf].filetype
         return not vim.tbl_contains(exclude, ft)
       end
     },
   },
   keys = {
-    { "<leader><leader>", function() Snacks.picker.buffers() end,     desc = "Buffers" },
-    { "<leader>fg",       function() Snacks.picker.grep() end,        desc = "Grep",                     nowait = true },
-    { "<leader>ff",       function() Snacks.picker.files() end,       desc = "Find Files",               nowait = true },
-    { "<leader>fw",       function() Snacks.picker.grep_word() end,   desc = "Visual selection or word", mode = { "n", "x" } },
-    { "<leader>fd",       function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
-    { "<leader>fh",       function() Snacks.picker.help() end,        desc = "Help Pages" },
-    { "<leader>fk",       function() Snacks.picker.keymaps() end,     desc = "Keymaps" },
-    { "<leader>u",        function() Snacks.picker.undo() end,        desc = "Undo History" },
-    { "<leader>lg",       function() Snacks.lazygit() end,            desc = "Lazygit" },
+    -- { "<leader><leader>", function() Snacks.picker.buffers() end, desc = "Buffers" },
+    -- { "<leader>fg",       function() Snacks.picker.grep() end,        desc = "Grep",                     nowait = true },
+    -- { "<leader>ff",       function() Snacks.picker.files() end,       desc = "Find Files",               nowait = true },
+    -- { "<leader>fw",       function() Snacks.picker.grep_word() end,   desc = "Visual selection or word", mode = { "n", "x" } },
+    -- { "<leader>fd",       function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
+    -- { "<leader>fh",       function() Snacks.picker.help() end,        desc = "Help Pages" },
+    -- { "<leader>fk",       function() Snacks.picker.keymaps() end,     desc = "Keymaps" },
+    -- { "<leader>u",        function() Snacks.picker.undo() end,    desc = "Undo History" },
+    { "<leader>lg", function() Snacks.lazygit() end, desc = "Lazygit" },
   }
 }
