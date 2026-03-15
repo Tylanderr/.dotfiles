@@ -14,7 +14,21 @@ return {
       enabled = true,
       preset = {
         keys = {
-          { icon = ' ', key = 'f', desc = 'File', action = function() require("fzf-lua").files() end },
+          {
+            icon = ' ',
+            key = 'f',
+            desc = 'File',
+            action =
+                function()
+                  require("fzf-lua").files({
+                    previewer = false,
+                    winopts = {
+                      height = 0.6,
+                      width = 0.4,
+                    }
+                  })
+                end,
+          },
           { icon = ' ', key = 'g', desc = 'Grep', action = function() require("fzf-lua").live_grep() end },
           { icon = '󰒲 ', key = 'L', desc = 'Lazy', action = ':Lazy', enabled = package.loaded.lazy ~= nil },
           { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
