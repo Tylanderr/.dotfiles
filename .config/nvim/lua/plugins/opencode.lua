@@ -11,11 +11,11 @@ return {
       ft = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
     },
     'hrsh7th/nvim-cmp',
-    'folke/snacks.nvim',
+    'ibhagwan/fzf-lua',
   },
   config = function()
     require("opencode").setup({
-      preferred_picker = 'snacks',
+      preferred_picker = 'fzf',
       preferred_completion = 'nvim-cmp',
       default_global_keymaps = true,
       default_mode = 'plan',
@@ -27,7 +27,7 @@ return {
         editor = {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
-          ['<leader>av'] = { 'add_visual_selection', mode = {'v'} },
+          ['<leader>av'] = { 'add_visual_selection', mode = { 'v' } },
         },
         input_window = {
           ['<tab>'] = { 'switch_mode' },

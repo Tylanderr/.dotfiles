@@ -6,7 +6,6 @@ return {
     { 'folke/lazydev.nvim',     ft = "lua",                            opts = {} },
     { 'deathbeam/lspecho.nvim', opts = { echo = true } },
     { 'hrsh7th/cmp-cmdline' },
-    { 'folke/snacks.nvim' },
   },
   config = function()
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -16,11 +15,11 @@ return {
           vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
-        map('gd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
-        map('gr', function() Snacks.picker.lsp_references() end, '[G]oto [R]eferences')
-        map('gi', function() Snacks.picker.lsp_implementations() end, '[G]oto [I]mplementation')
-        map('gD', function() Snacks.picker.lsp_declarations() end, '[G]oto [D]eclaration')
-        map("gy", function() Snacks.picker.lsp_type_definitions() end, "Goto T[y]pe Definition")
+        map('gd', function() require("fzf-lua").lsp_definitions() end, '[G]oto [D]efinition')
+        map('gr', function() require("fzf-lua").lsp_references() end, '[G]oto [R]eferences')
+        map('gi', function() require("fzf-lua").lsp_implementations() end, '[G]oto [I]mplementation')
+        map('gD', function() require("fzf-lua").lsp_declarations() end, '[G]oto [D]eclaration')
+        map("gy", function() require("fzf-lua").lsp_typedefs() end, "Goto T[y]pe Definition")
 
         map('K', function() vim.lsp.buf.hover({ border = 'rounded' }) end, 'Hover Documentation')
         map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')

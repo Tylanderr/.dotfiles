@@ -17,7 +17,6 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
     "tpope/vim-fugitive",
-    "folke/snacks.nvim",
   },
   config = function()
     require("neogit").setup({
