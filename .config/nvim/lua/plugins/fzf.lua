@@ -9,6 +9,11 @@ return {
     grep = {
       hidden = true,
     },
+    keymap = {
+      fzf = {
+        ["ctrl-q"] = "select-all+accept",
+      },
+    },
   },
   ---@diagnostic enable: missing-fields
   keys = {

@@ -32,6 +32,14 @@ return {
         },
         input_window = {
           ['<tab>'] = { 'switch_mode' },
+          ['<C-c>'] = {
+            function()
+              if require('opencode.state').is_running() then
+                require('opencode.api').cancel()
+              end
+            end,
+            mode = { 'n' },
+          },
         },
       },
       ui = {
