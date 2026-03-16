@@ -202,7 +202,7 @@ alias ccli="copilot login"
 alias ock="pkill -f opencode; sleep 2; pgrep -f opencode && pkill -9 -f opencode || true"
 
 # Neovim
-alias vim='nvim'
+function vim { if [ $# -eq 0 ]; then nvim .; else nvim "$@"; fi; }
 alias neovim='cd ~/.config/nvim/'
 
 # Java stuff
