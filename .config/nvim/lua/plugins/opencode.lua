@@ -47,5 +47,9 @@ return {
         zoom_width = 0.8,
       },
     })
+
+    vim.keymap.set("n", "<leader>mr", function()
+      require('render-markdown').toggle()
+    end, { desc = "Toggle markdown render" })
   end,
 }
