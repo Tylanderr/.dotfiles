@@ -186,6 +186,19 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
+VAULT_FILES=(
+    $HOME/.dotfiles/.bashrc.d/envrc
+    $HOME/.dotfiles/connections/connections.json
+)
+
+function vault-enc {
+  ansible-vault encrypt --ask-vault-pass "${VAULT_FILES[@]}"
+}
+
+function vault-dec {
+  ansible-vault decrypt --ask-vault-pass "${VAULT_FILES[@]}"
+}
+
 # Alias
 alias ls='eza -l'
 alias ll='eza -alF'
