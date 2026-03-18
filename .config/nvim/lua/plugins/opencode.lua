@@ -29,6 +29,9 @@ return {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
           ['<leader>av'] = { 'add_visual_selection', mode = { 'v' } },
+          ['<leader>oi'] = { function()
+            require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
+          end }
         },
         input_window = {
           ['<tab>'] = { 'switch_mode' },
