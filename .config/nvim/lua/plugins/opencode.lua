@@ -19,7 +19,7 @@ return {
       preferred_picker = 'fzf',
       preferred_completion = 'nvim-cmp',
       default_global_keymaps = true,
-      default_mode = 'plan',
+      default_mode = 'coworker',
       default_system_prompt = nil,
       keymap_prefix = '<leader>o',
       opencode_executable = 'opencode',
@@ -48,8 +48,7 @@ return {
       },
     })
 
-    vim.keymap.set("n", "<leader>mr", function()
-      require('render-markdown').toggle()
-    end, { desc = "Toggle markdown render" })
+    vim.keymap.set("n", "<leader>mr", function() require('render-markdown').toggle() end,
+      { desc = "Toggle markdown render" })
   end,
 }
