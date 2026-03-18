@@ -49,7 +49,7 @@ return {
         },
       },
       ui = {
-        window_width = 0.30,
+        window_width = 0.40,
         zoom_width = 0.8,
       },
     })

@@ -77,22 +77,24 @@ return {
           end
         end, { buffer = ev.buf, silent = true })
 
-        -- Always toggle at the file (Item) level, not the hunk level
+        -- Toggle folds: Item level for file diffs, Section level for Recent Commits
         vim.keymap.set("n", "<tab>", function()
           local instance = require("neogit.buffers.status").instance()
           if not instance then return end
 
+          -- Prefer an Item fold (file diffs); fall back to any foldable ancestor
+          -- (covers Section headers like "Recent Commits" and child commit rows)
           local fold = instance.buffer.ui:get_component_under_cursor(function(c)
             return c.options.foldable and c.options.tag == "Item"
-          end)
+          end) or instance.buffer.ui:get_fold_under_cursor()
           if not fold then return end
 
           if fold.options.on_open then
             fold.options.on_open(fold, instance.buffer.ui)
           else
             local start, _ = fold:row_range_abs()
-            -- Move cursor to the Item's filename row so normal! za acts on the
-            -- Item fold rather than any nested hunk fold under the cursor
+            -- Move cursor to the fold's first row so normal! za acts on the
+            -- correct fold rather than any nested fold under the cursor
             instance.buffer:move_cursor(start)
             local ok, _ = pcall(function() vim.cmd("normal! za") end)
             if ok then
