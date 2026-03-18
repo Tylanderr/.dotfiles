@@ -31,6 +31,9 @@ return {
           ['<leader>av'] = { 'add_visual_selection', mode = { 'v' } },
           ['<leader>oi'] = { function()
             require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
+          end },
+          ['<leader>on'] = { function()
+            require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false })
           end }
         },
         input_window = {
