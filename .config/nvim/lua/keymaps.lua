@@ -26,7 +26,7 @@ vim.keymap.set("n", "<c-f>", "<nop>")
 vim.keymap.set("n", "<leader>qu", "<cmd>q<CR>")
 vim.keymap.set("n", "<leader>QU", "<cmd>qa!<CR>")
 
-vim.keymap.set({ "n", "v" }, "<leader>cf", vim.lsp.buf.format, bufopts)
+vim.keymap.set({ "n", "v" }, "<leader>cf", vim.lsp.buf.format, { noremap = true, silent = true })
 vim.keymap.set({ "n", "v" }, "<leader>=", "mzgg=G`zzz", { noremap = true, silent = true })
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
@@ -36,7 +36,13 @@ vim.keymap.set("n", "<leader>nh", "<cmd>noh<CR>")
 vim.keymap.set("n", "<leader>wv", "<cmd>vsplit<CR>")
 vim.keymap.set("n", "<leader>ws", "<cmd>split<CR>")
 
-vim.keymap.set("n", "<leader>tc", "<cmd>tabclose<CR>")
+vim.keymap.set("n", "<leader>tc", function()
+  if vim.fn.tabpagenr() == 1 then
+    vim.cmd("tabonly")
+  else
+    vim.cmd("tabclose")
+  end
+end)
 vim.keymap.set("n", "<leader>tl", "<cmd>tabnext<CR>")
 vim.keymap.set("n", "<leader>th", "<cmd>tabprev<CR>")
 
