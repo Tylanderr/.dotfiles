@@ -46,3 +46,6 @@ vim.keymap.set("n", "qc", "<cmd>cclose<CR>")
 vim.keymap.set("n", "qo", "<cmd>copen<CR>")
 
 vim.keymap.set("n", "<leader>sft", "<cmd>lua print(vim.bo.filetype)<CR>")
+
+vim.keymap.set("n", "<leader>i", "1<C-w>w")
+vim.keymap.set("n", "<leader>wo", "<C-w>o")
