@@ -4,5 +4,17 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "default_agent": "plan"
+  "default_agent": "plan",
+
+  "agent": {
+    "coworker": {
+      "mode": "primary",
+      "description": "Custom agent to act as a coworker",
+      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
+      "permission": {
+        "edit": "ask",
+        "bash": "ask"
+      }
+    }
+  }
 }
