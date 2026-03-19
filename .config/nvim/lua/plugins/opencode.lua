@@ -11,13 +11,13 @@ return {
       },
       ft = { 'opencode_output' },
     },
-    'hrsh7th/nvim-cmp',
+    'saghen/blink.cmp',
     'ibhagwan/fzf-lua',
   },
   config = function()
     require("opencode").setup({
       preferred_picker = 'fzf',
-      preferred_completion = 'nvim-cmp',
+      preferred_completion = 'blink',
       default_global_keymaps = true,
       default_mode = 'coworker',
       default_system_prompt = nil,

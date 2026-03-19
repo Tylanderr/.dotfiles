@@ -5,7 +5,6 @@ return {
     { 'mason-org/mason.nvim',   opts = { ui = { border = "rounded" } } },
     { 'folke/lazydev.nvim',     ft = "lua",                            opts = {} },
     { 'deathbeam/lspecho.nvim', opts = { echo = true } },
-    { 'hrsh7th/cmp-cmdline' },
   },
   config = function()
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -29,9 +28,6 @@ return {
         map('<leader>lr', "<cmd>LspRestart<CR>", 'Restart LSP')
       end,
     })
-
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
     local function tableMerge(t1, t2)
       for _, v in ipairs(t2) do
