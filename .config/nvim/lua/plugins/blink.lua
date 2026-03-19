@@ -21,7 +21,13 @@ return {
     },
 
     completion = {
-      documentation = { auto_show = false },
+      menu = {
+        border = 'rounded',
+      },
+      documentation = {
+        auto_show = false,
+        window = { border = 'rounded' },
+      },
     },
 
     sources = {
