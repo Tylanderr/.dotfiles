@@ -3,14 +3,14 @@ return {
   event = "VeryLazy",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    {
-      "MeanderingProgrammer/render-markdown.nvim",
-      opts = {
-        anti_conceal = { enabled = false },
-        file_types = { 'opencode_output' },
-      },
-      ft = { 'opencode_output' },
-    },
+    -- {
+    --   "MeanderingProgrammer/render-markdown.nvim",
+    --   opts = {
+    --     anti_conceal = { enabled = false },
+    --     file_types = { 'opencode_output' },
+    --   },
+    --   ft = { 'opencode_output' },
+    -- },
     'saghen/blink.cmp',
     'ibhagwan/fzf-lua',
   },
@@ -49,7 +49,7 @@ return {
         },
       },
       ui = {
-        window_width = 0.40,
+        window_width = 0.30,
         zoom_width = 0.8,
       },
     })
