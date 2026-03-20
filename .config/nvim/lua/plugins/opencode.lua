@@ -40,7 +40,8 @@ return {
           ['<tab>'] = { 'switch_mode' },
           ['<C-c>'] = {
             function()
-              if require('opencode.state').is_running() then
+              local ok, state = pcall(require, 'opencode.state')
+              if ok and state.is_running and state.is_running() then
                 require('opencode.api').cancel()
               end
             end,
@@ -53,6 +54,45 @@ return {
         zoom_width = 0.8,
       },
     })
+
+    -- Toggle opencode window sizes between default (30%) and expanded (60%)
+    vim.keymap.set("n", "<leader>or", function()
+      local ok, ui = pcall(require, "opencode.ui.ui")
+      if not ok then return end
+
+      local opencode_fts = { opencode = true, opencode_output = true, opencode_footer = true }
+      local total_width = vim.o.columns
+      local default_width = math.floor(total_width * 0.30)
+      local expanded_width = math.floor(total_width * 0.60)
+
+      -- Find first opencode window to determine current state
+      local first_opencode_win = nil
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        local ft = vim.bo[buf].filetype
+        if opencode_fts[ft] then
+          first_opencode_win = win
+          break
+        end
+      end
+
+      if not first_opencode_win then return end
+
+      -- Check if currently at default width (with small tolerance for rounding)
+      local current_width = vim.api.nvim_win_get_width(first_opencode_win)
+      local is_default = math.abs(current_width - default_width) <= 1
+
+      -- Toggle to the opposite size
+      local target_width = is_default and expanded_width or default_width
+
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        local ft = vim.bo[buf].filetype
+        if opencode_fts[ft] then
+          pcall(vim.api.nvim_win_set_width, win, target_width)
+        end
+      end
+    end, { desc = "Toggle opencode window size (30%/60%)" })
 
     -- Close open windows except the focused and opencode related windows.
     -- If focused on an opencode window, also keep the leftmost non-opencode window.
