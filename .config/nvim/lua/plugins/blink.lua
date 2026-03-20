@@ -36,7 +36,10 @@ return {
 
     cmdline = {
       keymap = { preset = 'inherit' },
-      completion = { menu = { auto_show = true } },
+      completion = {
+        menu = { auto_show = true },
+        ghost_text = { enabled = false },
+      },
     },
 
     fuzzy = { implementation = "prefer_rust_with_warning" }
