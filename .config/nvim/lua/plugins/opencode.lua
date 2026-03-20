@@ -32,16 +32,24 @@ return {
           ['<leader>oi'] = { function()
             require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
           end },
+          ['<leader>ox'] = { function()
+            require('opencode.context').unload_attachments()
+          end },
           ['<leader>on'] = { function()
             local Promise = require('opencode.promise')
             Promise.async(function()
               local context = require('opencode.context')
-              -- Save current selections before new_session clears them
-              local saved = vim.deepcopy(context.get_context().selections)
+              -- Save current selections and mentioned files (including pasted images) before new_session clears them
+              local ctx = context.get_context()
+              local saved_selections = vim.deepcopy(ctx.selections or {})
+              local saved_files = vim.deepcopy(ctx.mentioned_files or {})
               require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false }):await()
-              -- Restore selections into the new session
-              for _, sel in ipairs(saved) do
+              -- Restore selections and files into the new session
+              for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
+              end
+              for _, file in ipairs(saved_files) do
+                context.add_file(file)
               end
             end)()
           end }
