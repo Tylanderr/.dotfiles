@@ -33,7 +33,17 @@ return {
             require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
           end },
           ['<leader>on'] = { function()
-            require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false })
+            local Promise = require('opencode.promise')
+            Promise.async(function()
+              local context = require('opencode.context')
+              -- Save current selections before new_session clears them
+              local saved = vim.deepcopy(context.get_context().selections)
+              require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false }):await()
+              -- Restore selections into the new session
+              for _, sel in ipairs(saved) do
+                context.add_selection(sel)
+              end
+            end)()
           end }
         },
         input_window = {
