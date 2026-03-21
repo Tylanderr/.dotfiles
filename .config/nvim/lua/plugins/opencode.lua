@@ -3,14 +3,14 @@ return {
   event = "VeryLazy",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    -- {
-    --   "MeanderingProgrammer/render-markdown.nvim",
-    --   opts = {
-    --     anti_conceal = { enabled = false },
-    --     file_types = { 'opencode_output' },
-    --   },
-    --   ft = { 'opencode_output' },
-    -- },
+    {
+      "MeanderingProgrammer/render-markdown.nvim",
+      opts = {
+        anti_conceal = { enabled = false },
+        file_types = { 'opencode_output' },
+      },
+      ft = { 'opencode_output' },
+    },
     'saghen/blink.cmp',
     'ibhagwan/fzf-lua',
   },
@@ -29,12 +29,15 @@ return {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
           ['<leader>av'] = { 'add_visual_selection', { open_input = false }, mode = { 'v' } },
+
           ['<leader>oi'] = { function()
             require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
           end },
+
           ['<leader>ox'] = { function()
             require('opencode.context').unload_attachments()
           end },
+
           ['<leader>on'] = { function()
             local Promise = require('opencode.promise')
             Promise.async(function()
@@ -44,6 +47,8 @@ return {
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
               require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false }):await()
+              -- Ensure coworker agent is selected
+              require('opencode.core').switch_to_mode('coworker'):await()
               -- Restore selections and files into the new session
               for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
@@ -54,8 +59,8 @@ return {
             end)()
           end }
         },
+
         input_window = {
-          ['<tab>'] = { 'switch_mode' },
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')
@@ -67,6 +72,7 @@ return {
           },
         },
       },
+
       ui = {
         window_width = 0.30,
         zoom_width = 0.8,
