@@ -3,7 +3,7 @@
   "permission": {
     "bash": "ask"
   },
-  "default_agent": "coworker",
+  "default_agent": "plan",
 
   "agent": {
     "coworker": {
