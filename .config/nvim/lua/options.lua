@@ -36,7 +36,7 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = "*",
+	pattern = { "*" },
 	callback = function()
 		vim.opt_local.formatoptions:remove({ 'o' })
 	end,

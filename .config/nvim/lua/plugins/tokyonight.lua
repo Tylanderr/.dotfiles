@@ -14,7 +14,7 @@ return {
     })
 
     -- Define toggle function
-    local function toggle_colorscheme()
+    vim.keymap.set('n', '<leader>ut', function()
       if current_scheme == 'tokyonight-storm' then
         current_scheme = 'tokyonight-day'
         current_transparency = false
@@ -22,17 +22,7 @@ return {
         current_scheme = 'tokyonight-storm'
         current_transparency = true
       end
-
-      -- Re-setup Tokyonight with new transparency
-      require('tokyonight').setup({
-        transparent = current_transparency,
-      })
-
-      -- Apply the new colorscheme
       vim.cmd.colorscheme(current_scheme)
-    end
-
-    -- Keybinding to toggle (change '<leader>ut' to whatever you like)
-    vim.keymap.set('n', '<leader>ut', toggle_colorscheme, { desc = 'Toggle Tokyonight Theme' })
+    end, { desc = 'Toggle Tokyonight Theme' })
   end
 }

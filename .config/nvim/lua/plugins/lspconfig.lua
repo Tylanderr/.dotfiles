@@ -64,20 +64,20 @@ return {
     for _, server in pairs(active) do
       vim.lsp.enable(server)
     end
-  end,
 
-  vim.diagnostic.config({
-    virtual_text = false,
-    underline = false,
-    float = {
-      border = "rounded",
-    }
-  }),
-
-  vim.keymap.set("n", "<leader>lx", function()
-    local diagnosticVisible = vim.diagnostic.config().virtual_text
     vim.diagnostic.config({
-      virtual_text = not diagnosticVisible,
+      virtual_text = false,
+      underline = false,
+      float = {
+        border = "rounded",
+      }
     })
-  end)
+
+    vim.keymap.set("n", "<leader>lx", function()
+      local diagnosticVisible = vim.diagnostic.config().virtual_text
+      vim.diagnostic.config({
+        virtual_text = not diagnosticVisible,
+      })
+    end)
+  end,
 }
