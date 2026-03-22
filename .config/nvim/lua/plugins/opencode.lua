@@ -61,6 +61,7 @@ return {
         },
 
         input_window = {
+          ['<M-m>'] = false,
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')

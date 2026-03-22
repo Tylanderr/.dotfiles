@@ -11,8 +11,8 @@
       "description": "Custom agent to act as a coworker",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
       "permission": {
-        "edit": "ask",
-        "bash": "ask"
+        "edit": "deny",
+        "bash": "deny"
       }
     }
   }
