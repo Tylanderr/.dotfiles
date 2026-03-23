@@ -28,7 +28,18 @@ return {
         editor = {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
-          ['<leader>av'] = { 'add_visual_selection', { open_input = false }, mode = { 'v' } },
+          ['<leader>av'] = {
+            function()
+              local mode = vim.fn.mode()
+              if mode:match('[vV\022]') then
+                require('opencode.api').add_visual_selection({ open_input = false })
+              else
+                local line = vim.fn.line('.')
+                require('opencode.api').add_visual_selection({ open_input = false }, { start = line, stop = line })
+              end
+            end,
+            mode = { 'n', 'v' },
+          },
 
           ['<leader>oi'] = { function()
             require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
