@@ -103,6 +103,52 @@ return {
       end
     end, { desc = "Reset opencode window size" })
 
+    -- Delete all saved opencode sessions
+    vim.keymap.set("n", "<leader>ods", function()
+      local choice = vim.fn.confirm("Delete ALL opencode sessions?", "&Yes\n&No", 2)
+      if choice ~= 1 then return end
+
+      vim.fn.jobstart({ "opencode", "session", "list" }, {
+        stdout_buffered = true,
+        on_stdout = function(_, data)
+          local ids = {}
+          for _, line in ipairs(data) do
+            local id = line:match("^(ses_%S+)")
+            if id then
+              table.insert(ids, id)
+            end
+          end
+
+          if #ids == 0 then
+            vim.notify("opencode: no sessions to delete", vim.log.levels.INFO)
+            return
+          end
+
+          local deleted = 0
+          local total = #ids
+          for _, id in ipairs(ids) do
+            vim.fn.jobstart({ "opencode", "session", "delete", id }, {
+              on_exit = function(_, code)
+                if code == 0 then
+                  deleted = deleted + 1
+                else
+                  vim.notify("opencode: failed to delete session " .. id, vim.log.levels.WARN)
+                end
+                if deleted == total then
+                  vim.notify(string.format("opencode: deleted %d session(s)", total), vim.log.levels.INFO)
+                end
+              end,
+            })
+          end
+        end,
+        on_exit = function(_, code)
+          if code ~= 0 then
+            vim.notify("opencode: session list command failed", vim.log.levels.ERROR)
+          end
+        end,
+      })
+    end, { desc = "Delete all opencode sessions" })
+
     -- Close open windows except the focused and opencode related windows.
     -- If focused on an opencode window, also keep the leftmost non-opencode window.
     vim.keymap.set("n", "<leader>wo", function()
