@@ -29,11 +29,11 @@ return {
           ['<leader>av'] = {
             function()
               local mode = vim.fn.mode()
-              if mode:match('[vV\022]') then
-                require('opencode.api').add_visual_selection({ open_input = false })
-              else
+              if mode:match('n') then
                 local line = vim.fn.line('.')
                 require('opencode.api').add_visual_selection({ open_input = false }, { start = line, stop = line })
+              else
+                require('opencode.api').add_visual_selection({ open_input = false })
               end
             end,
             mode = { 'n', 'v' },
