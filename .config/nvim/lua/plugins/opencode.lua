@@ -11,8 +11,6 @@ return {
       },
       ft = { 'opencode_output' },
     },
-    'saghen/blink.cmp',
-    'ibhagwan/fzf-lua',
   },
   config = function()
     require("opencode").setup({

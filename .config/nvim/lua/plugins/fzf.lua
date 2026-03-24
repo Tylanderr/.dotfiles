@@ -48,17 +48,16 @@ return {
       grep = {
         hidden = true,
       },
-      keymap = {
-        fzf = {
-          ["ctrl-q"] = "select-all+accept",
-        },
-      },
       actions = {
         files = {
           ["enter"] = with_opencode_redirect(actions.file_edit),
           ["ctrl-s"] = with_opencode_redirect(actions.file_split),
           ["ctrl-v"] = with_opencode_redirect(actions.file_vsplit),
           ["ctrl-t"] = with_opencode_redirect(actions.file_tabedit),
+          ["ctrl-q"] = {
+            fn = actions.file_edit_or_qf,
+            prefix = "select-all+"
+          }
         },
       },
     }
