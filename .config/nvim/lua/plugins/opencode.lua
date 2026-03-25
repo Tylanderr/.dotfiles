@@ -26,6 +26,7 @@ return {
         editor = {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
+          ['<leader>ods'] = false,
           ['<leader>av'] = {
             function()
               local mode = vim.fn.mode()
@@ -70,6 +71,7 @@ return {
         },
 
         input_window = {
+          ['<leader>ods'] = false,
           ['<M-m>'] = false,
           ['<C-c>'] = {
             function()
@@ -81,6 +83,9 @@ return {
             mode = { 'n' },
           },
         },
+        output_window = {
+          ['<leader>ods'] = false,
+        }
       },
 
       ui = {

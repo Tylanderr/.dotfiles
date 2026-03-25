@@ -39,12 +39,10 @@ return {
   "ibhagwan/fzf-lua",
   dependencies = { "nvim-tree/nvim-web-devicons" },
 
-  ---@module "fzf-lua"
-  ---@diagnostic disable: missing-fields
-  ---@type fun(): fzf-lua.Config
-  opts = function()
+  config = function()
     local actions = require("fzf-lua.actions")
-    return {
+    local fzf = require("fzf-lua")
+    fzf.setup({
       grep = {
         hidden = true,
       },
@@ -60,9 +58,10 @@ return {
           }
         },
       },
-    }
+    })
+    fzf.register_ui_select()
   end,
-  ---@diagnostic enable: missing-fields
+
   keys = {
     {
       "<leader>ff",

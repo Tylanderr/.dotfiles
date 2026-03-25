@@ -51,6 +51,11 @@ return {
         }
       },
     },
+    {
+      filter = { event = { "msg_show", "notify" } },
+      view = "notify",
+      opts = { replace = true, merge = false },
+    },
     messages = {
       enabled = true
     },
