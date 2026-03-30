@@ -49,3 +49,14 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+	desc = "Debug unexpected yanks to register x",
+	group = vim.api.nvim_create_augroup("debug-yank-x", { clear = true }),
+	callback = function(event)
+		if event.data and event.data.regname == "x" then
+			local stack = debug.traceback("Yank to register x detected", 2)
+			vim.notify(stack, vim.log.levels.WARN)
+		end
+	end,
+})
