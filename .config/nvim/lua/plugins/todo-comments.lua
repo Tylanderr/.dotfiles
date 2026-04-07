@@ -4,5 +4,5 @@ return {
   dependencies = { 'nvim-lua/plenary.nvim' },
   opts = { signs = false },
   vim.keymap.set("n", "<leader>td",
-    function() require("fzf-lua").grep({ search = "TODO|FIXME|XXX|HACK", no_esc = true }) end)
+    function() require("fzf-lua").grep({ search = "TODO|FIXME|NOTE|HACK|WARN", no_esc = true }) end)
 }
