@@ -3,6 +3,16 @@ return {
   ft = "java",
   version = "v3.0.0",
   config = function()
+    -- Temporary to suppress a deprecation message
+    local original_deprecate = vim.deprecate
+    vim.deprecate = function(name, alternative, version, plugin, backtrace)
+      if name == "The `require('lspconfig')` \"framework\"" and plugin == 'nvim-lspconfig' then
+        return
+      end
+
+      return original_deprecate(name, alternative, version, plugin, backtrace)
+    end
+
     require('java').setup({
       java_test = {
         enable = false
@@ -42,5 +52,7 @@ return {
         }
       },
     })
+
+    vim.deprecate = original_deprecate
   end,
 }
