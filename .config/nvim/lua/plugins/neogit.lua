@@ -107,15 +107,15 @@ return {
 
     vim.keymap.set("n", "<leader>gs", "<cmd>Neogit kind=floating<CR>")
     vim.keymap.set("n", "<leader>gt", "<cmd>Neogit<CR>")
-    vim.keymap.set('n', '<leader>gb', '<cmd>Git blame<CR>')
+    vim.keymap.set("n", "<leader>gb", "<cmd>Neogit branch<CR>")
+    vim.keymap.set("n", "<leader>gz", "<cmd>Neogit stash<CR>")
+    vim.keymap.set('n', '<leader>gB', '<cmd>Git blame<CR>')
     vim.keymap.set("n", "<leader>gp", "<cmd>Git push<CR>")
     vim.keymap.set("n", "<leader>gP", "<cmd>Git push --force<CR>")
     vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
     vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
     vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
     vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
-    vim.keymap.set("n", "<leader>gx", "<cmd>Neogit branch<CR>")
-    vim.keymap.set("n", "<leader>gz", "<cmd>Neogit stash<CR>")
 
     vim.api.nvim_create_autocmd("User", {
       pattern = "FugitiveChanged",
