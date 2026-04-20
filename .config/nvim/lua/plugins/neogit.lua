@@ -114,6 +114,8 @@ return {
     vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
     vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
     vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
+    vim.keymap.set("n", "<leader>gx", "<cmd>Neogit branch<CR>")
+    vim.keymap.set("n", "<leader>gz", "<cmd>Neogit stash<CR>")
 
     vim.api.nvim_create_autocmd("User", {
       pattern = "FugitiveChanged",
