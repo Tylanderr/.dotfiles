@@ -50,6 +50,6 @@ return {
       }
     })
     vim.keymap.set("n", "-", require("oil").open_float)
-    vim.keymap.set("n", "=", "<cmd>Oil<CR>")
+    vim.keymap.set("n", "<leader>-", "<cmd>Oil<CR>")
   end,
 }
