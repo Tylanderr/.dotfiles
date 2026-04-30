@@ -4,7 +4,7 @@ return {
   config = function()
     local render_markdown = require('render-markdown')
     render_markdown.setup({
-      render_modes = { 'n', 'no', 'i', 'c', 't' },
+      render_modes = { 'n', 'no', 'i', 'c', 't', 'v', 'V', '\22' },
       anti_conceal = {
         enabled = true,
         disabled_modes = { 'n', 'c', 't' },
