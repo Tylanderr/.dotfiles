@@ -4,9 +4,6 @@
     "bash": "ask"
   },
   "default_agent": "plan",
-  "instructions": [
-    "~/.config/opencode/prompts/caveman.txt"
-  ],
 
   "agent": {
     "coworker": {

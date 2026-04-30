@@ -54,9 +54,38 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Debug unexpected yanks to register x",
 	group = vim.api.nvim_create_augroup("debug-yank-x", { clear = true }),
 	callback = function(event)
-		if event.data and event.data.regname == "x" then
+		local data = event.data or {}
+		if data.regname == "x" then
+			local logfile = vim.fn.stdpath("state") .. "/yank-debug.log"
+			local buf = event.buf or vim.api.nvim_get_current_buf()
+			local file = vim.api.nvim_buf_get_name(buf)
+			if file == "" then
+				file = "[No Name]"
+			end
+
+			local pos = vim.api.nvim_win_get_cursor(0)
 			local stack = debug.traceback("Yank to register x detected", 2)
-			vim.notify(stack, vim.log.levels.WARN)
+			local lines = {
+				("[%s] reg=%s op=%s file=%s buf=%d line=%d col=%d visual=%s"):format(
+					os.date("%Y-%m-%d %H:%M:%S"),
+					data.regname or "",
+					data.operator or "",
+					file,
+					buf,
+					pos[1],
+					pos[2],
+					tostring(data.visual)
+				),
+				stack,
+				"",
+			}
+
+			local ok, err = pcall(vim.fn.writefile, lines, logfile, "a")
+			if ok then
+				vim.notify("Yank to register x logged: " .. logfile, vim.log.levels.WARN)
+			else
+				vim.notify("Failed to write yank debug log: " .. tostring(err), vim.log.levels.ERROR)
+			end
 		end
 	end,
 })
