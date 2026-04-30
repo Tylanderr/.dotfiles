@@ -48,13 +48,19 @@ return {
             { find = 'stack traceback' },
             { find = 'No results found' }
           }
-        }
+        },
+      },
+      {
+        filter = { event = 'notify' },
+        view = "notify",
+        opts = { replace = true, merge = false },
       },
     },
-    {
-      filter = { event = { "msg_show", "notify" } },
-      view = "notify",
-      opts = { replace = true, merge = false },
+    views = {
+      notify = {
+        replace = true,
+        merge = false,
+      },
     },
     messages = {
       enabled = true
