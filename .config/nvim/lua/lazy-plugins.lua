@@ -14,6 +14,7 @@ require('lazy').setup({
     { import = "plugins.mini" },
     { import = "plugins.neogit" },
     { import = "plugins.noice" },
+    { import = "plugins.obsidian" },
     { import = "plugins.oil" },
     { import = "plugins.opencode" },
     { import = "plugins.refactoring" },
