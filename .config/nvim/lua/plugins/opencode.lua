@@ -1,6 +1,7 @@
 return {
   "sudo-tee/opencode.nvim",
   event = "VeryLazy",
+  commit = "8edc19ac64e3075d4d68e49ef6846dec562ed316",
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
