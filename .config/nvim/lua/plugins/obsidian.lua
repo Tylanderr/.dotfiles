@@ -15,7 +15,11 @@ return {
       },
     },
     ui = {
-      enable = false
-    }
+      enable = false,
+      checkboxes = {
+        [" "] = { order = 1, char = " ", hl_group = "ObsidianTodo" },
+        ["x"] = { order = 2, char = "x", hl_group = "ObsidianDone" },
+      },
+    },
   },
 }
