@@ -1,6 +1,14 @@
 local float_term_buf = nil
 local float_term_win = nil
 
+local function setup_term_keymaps(buf)
+  -- ESC in terminal mode → normal mode (allows vim navigation)
+  vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { buffer = buf, nowait = true })
+  -- i/a in normal mode → back to terminal insert mode
+  vim.keymap.set("n", "i", "i", { buffer = buf })
+  vim.keymap.set("n", "a", "a", { buffer = buf })
+end
+
 local function toggle_float_term()
   if float_term_win and vim.api.nvim_win_is_valid(float_term_win) then
     vim.api.nvim_win_close(float_term_win, false)
@@ -13,7 +21,8 @@ local function toggle_float_term()
   local row = math.floor((vim.o.lines - height) / 2)
   local col = math.floor((vim.o.columns - width) / 2)
 
-  if not float_term_buf or not vim.api.nvim_buf_is_valid(float_term_buf) then
+  local is_new_buf = not float_term_buf or not vim.api.nvim_buf_is_valid(float_term_buf)
+  if is_new_buf then
     float_term_buf = vim.api.nvim_create_buf(false, true)
   end
 
@@ -29,6 +38,7 @@ local function toggle_float_term()
 
   if vim.bo[float_term_buf].buftype ~= "terminal" then
     vim.cmd("terminal")
+    setup_term_keymaps(float_term_buf)
   end
 
   vim.cmd("startinsert")
