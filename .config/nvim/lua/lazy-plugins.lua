@@ -18,6 +18,7 @@ require('lazy').setup({
     { import = "plugins.oil" },
     { import = "plugins.opencode" },
     { import = "plugins.refactoring" },
+    { import = "plugins.terminal" },
     { import = "plugins.tmux-navigator" },
     { import = "plugins.todo-comments" },
     { import = "plugins.tokyonight" },
