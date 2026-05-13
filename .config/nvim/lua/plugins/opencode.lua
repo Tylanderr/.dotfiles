@@ -1,7 +1,7 @@
 return {
   "sudo-tee/opencode.nvim",
   event = "VeryLazy",
-  commit = "8edc19ac64e3075d4d68e49ef6846dec562ed316",
+  -- commit = "8edc19ac64e3075d4d68e49ef6846dec562ed316",
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
@@ -34,7 +34,7 @@ return {
           },
 
           ['<leader>oi'] = { function()
-            require('opencode.core').open({ new_session = false, focus = 'input', start_insert = false })
+            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = false })
           end },
 
           ['<leader>ox'] = { function()
@@ -49,9 +49,9 @@ return {
               local ctx = context.get_context()
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
-              require('opencode.core').open({ new_session = true, focus = 'input', start_insert = false }):await()
+              require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false }):await()
               -- Ensure coworker agent is selected
-              require('opencode.core').switch_to_mode('coworker'):await()
+              require('opencode.services.agent_model').switch_to_mode('coworker'):await()
               -- Restore selections and files into the new session
               for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
