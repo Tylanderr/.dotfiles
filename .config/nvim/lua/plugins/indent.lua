@@ -4,7 +4,11 @@ return {
   main = "ibl",
   ---@module "ibl"
   ---@type ibl.config
+  keys = {
+    { "<leader>lt", "<cmd>IBLToggle<cr>", desc = "Indent (L)ine (T)oggle" },
+  },
   opts = {
+    enabled = false,
     exclude = {
       filetypes = {
         "java",
