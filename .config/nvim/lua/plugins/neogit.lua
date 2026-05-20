@@ -1,15 +1,3 @@
-local function float_layout()
-  local ui = vim.api.nvim_list_uis()[1]
-  if not ui then
-    return
-  end
-
-  return {
-    height = math.floor(ui.height * 0.7),
-    width = math.floor(ui.width * 0.7),
-  }
-end
-
 return {
   "NeogitOrg/neogit",
   event = "VeryLazy",
@@ -23,7 +11,10 @@ return {
       use_default_keymaps = false,
       disable_context_highlighting = true,
       disable_hint = true,
-      floating = float_layout(),
+      floating = {
+        height = 0.7,
+        width = 0.7,
+      },
       mappings = {
         commit_editor = {},
         commit_editor_I = {},
