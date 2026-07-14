@@ -56,10 +56,5 @@ return {
         width = 50,
       },
     },
-    hooks = {
-      diff_buf_read = function()
-        vim.opt_local.foldlevel = 99
-      end,
-    },
   },
 }
