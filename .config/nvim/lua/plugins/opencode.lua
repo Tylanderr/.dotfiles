@@ -45,14 +45,13 @@ return {
             local Promise = require('opencode.promise')
             Promise.async(function()
               local context = require('opencode.context')
-              -- Save current selections and mentioned files (including pasted images) before new_session clears them
+
               local ctx = context.get_context()
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
               require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false }):await()
-              -- Ensure coworker agent is selected
-              require('opencode.services.agent_model').switch_to_mode('coworker'):await()
-              -- Restore selections and files into the new session
+              -- require('opencode.services.agent_model').switch_to_mode('coworker'):await()
+
               for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
               end
@@ -65,7 +64,7 @@ return {
 
         input_window = {
           ['<leader>ods'] = false,
-          ['<M-m>'] = false,
+          ['<tab>'] = { 'switch_mode', mode = { 'n'} },
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')
@@ -78,6 +77,7 @@ return {
         },
         output_window = {
           ['<leader>ods'] = false,
+          ['<tab>'] = false,
         }
       },
 
