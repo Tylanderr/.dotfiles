@@ -2,7 +2,24 @@ return {
   "sindrets/diffview.nvim",
   event = "VeryLazy",
   keys = {
-    { "<leader>gdm", ":DiffviewOpen ", desc = "DiffviewOpen" },
+    {
+      "<leader>gdm",
+      function()
+        local lib = require("diffview.lib")
+        for index = #lib.views, 1, -1 do
+          local view = lib.views[index]
+          view:close()
+          lib.dispose_view(view)
+        end
+
+        vim.api.nvim_feedkeys(
+          vim.api.nvim_replace_termcodes(":DiffviewOpen ", true, false, true),
+          "n",
+          false
+        )
+      end,
+      desc = "DiffviewOpen",
+    },
     {
       "<leader>gdo",
       function()
@@ -28,17 +45,23 @@ return {
 
         vim.cmd("1tabnext")
 
-        local buflist = vim.fn.tabpagebuflist(1)
-        for _, bufnr in ipairs(buflist) do
-          if vim.api.nvim_buf_get_name(bufnr) == path then
-            local wins = vim.api.nvim_tabpage_list_wins(1)
-            for _, win in ipairs(wins) do
-              if vim.api.nvim_win_get_buf(win) == bufnr then
-                vim.fn.win_gotoid(win)
-                return
-              end
-            end
+        local api = vim.api
+        local leftmost_win
+        local leftmost_position
+        for _, win in ipairs(api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())) do
+          local position = api.nvim_win_get_position(win)
+          if
+            not leftmost_position
+            or position[2] < leftmost_position[2]
+            or (position[2] == leftmost_position[2] and position[1] < leftmost_position[1])
+          then
+            leftmost_win = win
+            leftmost_position = position
           end
+        end
+
+        if leftmost_win then
+          api.nvim_set_current_win(leftmost_win)
         end
 
         vim.cmd("edit " .. vim.fn.fnameescape(path))
