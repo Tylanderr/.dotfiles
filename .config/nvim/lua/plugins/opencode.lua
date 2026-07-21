@@ -50,7 +50,7 @@ return {
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
               require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false }):await()
-              -- require('opencode.services.agent_model').switch_to_mode('coworker'):await()
+              require('opencode.services.agent_model').switch_to_mode('coworker'):await()
 
               for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
@@ -84,6 +84,7 @@ return {
       ui = {
         window_width = 0.30,
         zoom_width = 0.8,
+        picker_width = 0.6,
       },
     })
 
