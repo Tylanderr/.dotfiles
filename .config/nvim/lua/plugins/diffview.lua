@@ -1,10 +1,22 @@
 return {
   "sindrets/diffview.nvim",
   event = "VeryLazy",
+  opts = {
+    file_panel = {
+      listing_style = "tree",
+      tree_options = {
+        flatten_dirs = true,
+      },
+      win_config = {
+        width = 50,
+      }
+    }
+  },
+
   keys = {
-    {
-      "<leader>gdm",
-      function()
+    { "<c-u>", function() require("diffview.actions").scroll_view(-0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view up", },
+    { "<c-d>", function() require("diffview.actions").scroll_view(0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view down", },
+    { "<leader>gdm", function()
         local lib = require("diffview.lib")
         for index = #lib.views, 1, -1 do
           local view = lib.views[index]
@@ -20,9 +32,7 @@ return {
       end,
       desc = "DiffviewOpen",
     },
-    {
-      "<leader>gdo",
-      function()
+    { "<leader>gdo", function()
         local lib = require("diffview.lib")
         local view = lib.get_current_view()
         if not view then
@@ -67,17 +77,6 @@ return {
         vim.cmd("edit " .. vim.fn.fnameescape(path))
       end,
       desc = "Open current diffview file in tab 1",
-    },
-  },
-  opts = {
-    file_panel = {
-      listing_style = "tree",
-      tree_options = {
-        flatten_dirs = true,
-      },
-      win_config = {
-        width = 50,
-      },
-    },
-  },
+    }
+  }
 }
