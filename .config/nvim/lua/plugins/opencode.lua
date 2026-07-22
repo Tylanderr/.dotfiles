@@ -64,7 +64,7 @@ return {
 
         input_window = {
           ['<leader>ods'] = false,
-          ['<tab>'] = { 'switch_mode', mode = { 'n'} },
+          ['<S-tab>'] = { 'switch_mode', mode = { 'n'} },
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')
@@ -77,7 +77,6 @@ return {
         },
         output_window = {
           ['<leader>ods'] = false,
-          ['<tab>'] = false,
         }
       },
 
