@@ -4,9 +4,14 @@
   "permission": {
     "bash": "ask"
   },
-  "default_agent": "plan",
-
+  "default_agent": "coworker",
   "agent": {
+    "plan": {
+      "disable": true
+    },
+    "build": {
+      "disable": false
+    },
     "coworker": {
       "mode": "primary",
       "description": "Custom agent to act as a coworker",
