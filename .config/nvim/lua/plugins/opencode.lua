@@ -81,9 +81,15 @@ return {
       },
 
       ui = {
-        window_width = 0.30,
+        window_width = 0.33,
         zoom_width = 0.8,
         picker_width = 0.6,
+
+        output = {
+          tools = {
+            show_reasoning_output = false,
+          }
+        }
       },
     })
 
