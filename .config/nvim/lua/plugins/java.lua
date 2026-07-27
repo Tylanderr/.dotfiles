@@ -37,6 +37,30 @@ return {
       }
     })
 
+    -- jdtls uses this custom request for Spring Boot and workspace commands.
+    vim.lsp.handlers['workspace/executeClientCommand'] = function(_, params, ctx)
+      local client = vim.lsp.get_client_by_id(ctx.client_id) or {}
+      local command = (client.commands or {})[params.command]
+        or vim.lsp.commands[params.command]
+
+      if not command then
+        return vim.lsp.rpc_response_error(
+          vim.lsp.protocol.ErrorCodes.MethodNotFound,
+          'Command ' .. params.command .. ' not supported on client'
+        )
+      end
+
+      local ok, result = pcall(command, params.arguments, ctx)
+      if ok then
+        return result or vim.NIL
+      end
+
+      return vim.lsp.rpc_response_error(
+        vim.lsp.protocol.ErrorCodes.InternalError,
+        result
+      )
+    end
+
     require('lspconfig').jdtls.setup({
       settings = {
         java = {
