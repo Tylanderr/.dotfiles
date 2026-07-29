@@ -3,6 +3,9 @@
   "autoupdate": false,
   "permission": {
     "*": "ask",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
     "bash": {
       "*": "ask",
       "ls *": "allow",
@@ -10,11 +13,12 @@
       "git commit *": "deny",
       "git push *": "deny",
       "grep *": "allow",
+      "mvn *": "allow",
       "rm *": "deny"
     },
     "edit": {
       "*": "deny"
-    }
+    },
   },
   "default_agent": "coworker",
   "agent": {
@@ -26,8 +30,6 @@
         "bash": {
           "git *": "allow",
           "git commit *": "ask",
-          "git push *": "deny",
-          "grep *": "allow"
         },
         "edit": "allow"
       }
