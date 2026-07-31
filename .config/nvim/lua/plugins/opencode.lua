@@ -96,7 +96,7 @@ return {
     -- Reset opencode windows to their default width (30%)
     vim.keymap.set("n", "<leader>or", function()
       local opencode_fts = { opencode = true, opencode_output = true, opencode_footer = true }
-      local default_width = math.floor(vim.o.columns * 0.30)
+      local default_width = math.floor(vim.o.columns * 0.33)
 
       for _, win in ipairs(vim.api.nvim_list_wins()) do
         local buf = vim.api.nvim_win_get_buf(win)
