@@ -6,7 +6,6 @@
     "read": "allow",
     "glob": "allow",
     "grep": "allow",
-    "python": "deny",
     "bash": {
       "*": "ask",
       "ls *": "allow",
@@ -15,7 +14,8 @@
       "git push *": "deny",
       "grep *": "allow",
       "mvn *": "allow",
-      "rm *": "deny"
+      "rm *": "deny",
+      "python *": "deny"
     },
     "edit": {
       "*": "deny"
@@ -31,9 +31,9 @@
         "bash": {
           "git *": "allow",
           "git commit *": "ask",
+          "python *": "allow"
         },
         "edit": "allow",
-        "python": "allow"
       }
     },
     "coworker": {
