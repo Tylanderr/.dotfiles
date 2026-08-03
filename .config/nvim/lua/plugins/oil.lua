@@ -19,6 +19,7 @@ return {
         ["<C-l>"] = false,
         ["<C-c>"] = false,
         ["<C-t>"] = false,
+        ["<C-p>"] = false,
         ["<C-v>"] = { "actions.select", opts = { vertical = true } },
         ["q"] = { "actions.close", nowait = true },
       },

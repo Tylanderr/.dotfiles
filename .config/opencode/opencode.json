@@ -6,6 +6,7 @@
     "read": "allow",
     "glob": "allow",
     "grep": "allow",
+    "python": "deny",
     "bash": {
       "*": "ask",
       "ls *": "allow",
@@ -31,7 +32,8 @@
           "git *": "allow",
           "git commit *": "ask",
         },
-        "edit": "allow"
+        "edit": "allow",
+        "python": "allow"
       }
     },
     "coworker": {
