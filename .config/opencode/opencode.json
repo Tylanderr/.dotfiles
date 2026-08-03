@@ -16,11 +16,11 @@
       "grep *": "allow",
       "mvn *": "allow",
       "rm *": "deny",
-      "python *": "deny"
+      "python3 *": "deny"
     },
     "edit": {
       "*": "deny"
-    },
+    }
   },
   "default_agent": "coworker",
   "agent": {
@@ -32,9 +32,9 @@
         "bash": {
           "git *": "allow",
           "git commit *": "ask",
-          "python *": "allow"
+          "python3 *": "allow"
         },
-        "edit": "allow",
+        "edit": "allow"
       }
     },
     "coworker": {

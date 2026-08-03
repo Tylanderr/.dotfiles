@@ -50,7 +50,31 @@ return {
         end
       }
     })
-    vim.keymap.set("n", "-", require("oil").open_float)
-    vim.keymap.set("n", "<leader>-", "<cmd>Oil<CR>")
+    vim.keymap.set("n", "<leader>-", require("oil").open_float)
+    vim.keymap.set("n", "-", function()
+      local ok, ui = pcall(require, "opencode.ui.ui")
+      local current_win = vim.api.nvim_get_current_win()
+
+      if ok and ui.is_opencode_window(current_win) then
+        local target_win
+        local leftmost_col = math.huge
+
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          if not ui.is_opencode_window(win) then
+            local position = vim.api.nvim_win_get_position(win)
+            if position[2] < leftmost_col then
+              leftmost_col = position[2]
+              target_win = win
+            end
+          end
+        end
+
+        if target_win then
+          vim.api.nvim_set_current_win(target_win)
+        end
+      end
+
+      vim.cmd("Oil")
+    end, { desc = "Open Oil" })
   end,
 }
