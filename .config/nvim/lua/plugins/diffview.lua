@@ -14,8 +14,6 @@ return {
   },
 
   keys = {
-    { "<c-u>", function() require("diffview.actions").scroll_view(-0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view up", },
-    { "<c-d>", function() require("diffview.actions").scroll_view(0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view down", },
     { "<leader>gdm", function()
         local lib = require("diffview.lib")
         for index = #lib.views, 1, -1 do
