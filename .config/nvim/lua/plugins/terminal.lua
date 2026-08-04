@@ -87,5 +87,5 @@ end
 
 return {
   vim.keymap.set({ "n", "t" }, "<C-t>", toggle_float_term),
-  vim.keymap.set({ "n", "t" }, "<C-p>", toggle_notes_term, { desc = "Toggle notes terminal" }),
+  vim.keymap.set({ "n", "t" }, "<C-b>", toggle_notes_term, { desc = "Toggle notes terminal" }),
 }
