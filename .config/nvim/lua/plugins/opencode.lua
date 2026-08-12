@@ -64,6 +64,7 @@ return {
 
         input_window = {
           ['<leader>ods'] = false,
+          ['<leader>ot'] = { 'configure_variant' },
           ['<S-tab>'] = { 'switch_mode', mode = { 'n'} },
           ['<C-c>'] = {
             function()
