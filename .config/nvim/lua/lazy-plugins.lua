@@ -10,6 +10,7 @@ require('lazy').setup({
     { import = "plugins.java" },
     { import = "plugins.lspconfig" },
     { import = "plugins.lualine" },
+    { import = "plugins.markdown" },
     { import = "plugins.mini" },
     { import = "plugins.neogit" },
     { import = "plugins.noice" },
