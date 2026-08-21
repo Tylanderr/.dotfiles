@@ -28,6 +28,7 @@
       "disable": true
     },
     "build": {
+      "disable": true,
       "permission": {
         "bash": {
           "git *": "allow",
@@ -44,3 +45,4 @@
     }
   }
 }
+
