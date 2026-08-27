@@ -15,10 +15,23 @@ return {
       keymap_prefix = '<leader>o',
       opencode_executable = 'opencode',
 
+      context = {
+        current_file = {
+          enabled = false,
+        },
+        diagnostics = {
+          enabled = false,
+        },
+        selection = {
+          enabled = false,
+        }
+      },
+
       keymap = {
         editor = {
           ['<C-\\>'] = { 'toggle' },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
+          ['<leader>ot'] = { 'configure_variant' },
           ['<leader>ods'] = false,
           ['<leader>av'] = {
             function()
@@ -33,8 +46,22 @@ return {
             mode = { 'n', 'v' },
           },
 
+          ['<leader>af'] = {
+            function()
+              local file = vim.api.nvim_buf_get_name(0)
+
+              if file == '' then
+                vim.notify('Current buffer has no file to add', vim.log.levels.WARN)
+                return
+              end
+
+              require('opencode.context').add_file(file)
+            end,
+            mode = { 'n' },
+          },
+
           ['<leader>oi'] = { function()
-            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = false })
+            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = true })
           end },
 
           ['<leader>ox'] = { function()
@@ -64,8 +91,7 @@ return {
 
         input_window = {
           ['<leader>ods'] = false,
-          ['<leader>ot'] = { 'configure_variant' },
-          ['<S-tab>'] = { 'switch_mode', mode = { 'n'} },
+          ['<S-tab>'] = { 'switch_mode', mode = { 'n' } },
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')

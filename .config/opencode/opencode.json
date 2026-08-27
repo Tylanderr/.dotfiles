@@ -1,12 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": false,
+
   "permission": {
     "*": "ask",
     "read": "allow",
     "glob": "allow",
     "grep": "allow",
     "todowrite": "allow",
+    "question": "allow",
+
+    "edit": "deny",
+    "task": "deny",
+
     "bash": {
       "*": "ask",
       "ls *": "allow",
@@ -18,15 +24,19 @@
       "rm *": "deny",
       "python3 *": "deny"
     },
-    "edit": {
-      "*": "deny"
+
+    "external_directory": {
+      "/home/tyler/projects/*": "allow"
     }
   },
+
   "default_agent": "coworker",
+
   "agent": {
     "plan": {
       "disable": true
     },
+
     "build": {
       "disable": true,
       "permission": {
@@ -38,10 +48,11 @@
         "edit": "allow"
       }
     },
+
     "coworker": {
       "mode": "primary",
       "description": "Custom agent to act as a coworker",
-      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}"
+      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
     }
   }
 }
