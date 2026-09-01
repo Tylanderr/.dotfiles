@@ -20,13 +20,24 @@ return {
           enabled = false,
         },
         diagnostics = {
-          enabled = false,
-        },
+          enabled = true,
+        }
       },
 
       keymap = {
         editor = {
-          ['<C-\\>'] = { 'toggle' },
+          ['<C-\\>'] = {
+            function()
+              local previous_win = vim.api.nvim_get_current_win()
+              local toggle_promise = require('opencode.api').toggle()
+
+              if vim.api.nvim_win_is_valid(previous_win) then
+                vim.api.nvim_set_current_win(previous_win)
+              end
+
+              return toggle_promise
+            end,
+          },
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
           ['<leader>ot'] = { 'configure_variant' },
           ['<leader>ods'] = false,
@@ -58,7 +69,7 @@ return {
           },
 
           ['<leader>oi'] = { function()
-            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = true })
+            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = false })
           end },
 
           ['<leader>ox'] = { function()
@@ -83,16 +94,67 @@ return {
                 context.add_file(file)
               end
             end)()
-          end }
+          end },
+
+          ['<leader>ov'] = { function ()
+            local state = require("opencode.state")
+            local ui = require("opencode.ui.ui")
+            local image_handler = require("opencode.image_handler")
+
+            ui.focus_input({ restore_position = true, start_insert = false })
+
+            local windows = state.windows
+            if not windows then
+              vim.notify("OpenCode input window is not open", vim.log.levels.WARN)
+              return
+            end
+
+            local win = windows.input_win
+            local buf = windows.input_buf
+
+            if not win or not buf then
+              vim.notify("OpenCode input window is not available", vim.log.levels.WARN)
+              return
+            end
+
+            local row, col = unpack(vim.api.nvim_win_get_cursor(win))
+            local line = vim.api.nvim_buf_get_lines(buf, row - 1, row, false)[1] or ""
+
+            -- Split the current line at the cursor.
+            vim.api.nvim_buf_set_lines(buf, row - 1, row, false, {
+              line:sub(1, col),
+              line:sub(col + 1),
+            })
+            vim.api.nvim_win_set_cursor(win, { row + 1, 0 })
+
+            local pasted = image_handler.paste_image_from_clipboard()
+            if not pasted then
+              return
+            end
+
+            -- Image insertion is scheduled by opencode.nvim, so wait for it.
+            vim.schedule(function()
+              local image_row = row + 1
+
+              -- Insert a new line after the image mention.
+              vim.api.nvim_buf_set_lines(buf, image_row, image_row, false, { "" })
+              vim.api.nvim_set_current_win(win)
+              vim.api.nvim_win_set_cursor(win, { image_row + 1, 0 })
+
+              vim.cmd("stopinsert")
+            end)
+          end}
         },
 
         input_window = {
+          ["j"] = { function() vim.cmd("normal! gj") end, mode = "n" },
+          ["k"] = { function() vim.cmd("normal! gk") end, mode = "n" },
           ['<leader>ods'] = false,
           ['<S-tab>'] = { 'switch_mode', mode = { 'n' } },
           ['<C-c>'] = {
             function()
               local ok, state = pcall(require, 'opencode.state')
-              if ok and state.is_running and state.is_running() then
+              if ok and state.jobs.is_running() then
                 require('opencode.api').cancel()
               end
             end,
@@ -108,6 +170,12 @@ return {
         window_width = 0.33,
         zoom_width = 0.8,
         picker_width = 0.6,
+
+        input = {
+          text = {
+            wrap = true,
+          },
+        },
 
         output = {
           tools = {
