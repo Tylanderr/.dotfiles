@@ -15,14 +15,23 @@
 
     "bash": {
       "*": "ask",
+
       "ls *": "allow",
-      "git *": "allow",
-      "git commit *": "deny",
-      "git push *": "deny",
-      "grep *": "allow",
       "mvn *": "allow",
       "rm *": "deny",
-      "python3 *": "deny"
+      "python3 *": "deny",
+
+      "git *": "allow",
+      "git commit": "deny",
+      "git commit *": "deny",
+      "git push": "deny",
+      "git push *": "deny",
+      "git reset": "deny",
+      "git reset *": "deny",
+      "git clean": "deny",
+      "git clean *": "deny",
+      "git checkout": "deny",
+      "git checkout *": "deny"
     },
 
     "external_directory": {
@@ -40,11 +49,6 @@
     "build": {
       "disable": true,
       "permission": {
-        "bash": {
-          "git *": "allow",
-          "git commit *": "ask",
-          "python3 *": "allow"
-        },
         "edit": "allow"
       }
     },
