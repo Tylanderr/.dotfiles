@@ -22,9 +22,6 @@ return {
         diagnostics = {
           enabled = false,
         },
-        selection = {
-          enabled = false,
-        }
       },
 
       keymap = {
