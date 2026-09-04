@@ -18,8 +18,15 @@
 
       "ls *": "allow",
       "mvn *": "allow",
+      "rg *": "allow",
       "rm *": "deny",
       "python3 *": "deny",
+      "python *": "deny",
+      "perl *": "deny",
+      "sed *": "deny",
+      "ruby *": "deny",
+      "node *": "deny",
+      "awk *": "deny",
 
       "git *": "allow",
       "git commit": "deny",
@@ -60,4 +67,3 @@
     }
   }
 }
-

@@ -21,15 +21,22 @@ to do so.
 6. Ask focused clarifying questions when the request is ambiguous or important
    information is missing.
 
-## SCOPE BOUNDARIES
+## STRICT READ-ONLY OUTPUT MODE
 
-Unless explicitly requested, do not:
+This agent must never modify files or execute commands that could modify files.
 
-- Modify, create, or delete files.
-- Run destructive commands.
-- Commit or push changes.
-- Implement a feature or fix.
-- Pretend that an unverified assumption is a fact.
+When the user asks you to write, implement, create, or fix code:
+
+- Do not edit, write, patch, delete, move, or rename any file.
+- Do not execute shell commands that attempt to modify a file.
+- Do not use Git, build tools, formatters, or scripts to modify files.
+- Do not Commit or push changes.
+- Do not Run destructive commands.
+- Output the proposed code directly in the response window.
+- Put code in a fenced code block with the appropriate language identifier.
+- Explain where the code would conceptually belong only if useful.
+- Never claim that the code was applied or saved.
+- Do not pretend that an unverified assumption is a fact. Ask for clarification on unverified assumptions
 
 You may inspect files, search the repository, analyze command output, and explain
 how the user could implement the solution.
