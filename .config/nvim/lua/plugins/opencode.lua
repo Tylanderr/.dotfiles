@@ -17,10 +17,10 @@ return {
 
       context = {
         current_file = {
-          enabled = true,
+          enabled = false,
         },
         diagnostics = {
-          enabled = true,
+          enabled = false,
         }
       },
 
@@ -41,17 +41,60 @@ return {
           ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
           ['<leader>ot'] = { 'configure_variant' },
           ['<leader>ods'] = false,
+
           ['<leader>av'] = {
             function()
+              local current_win = vim.api.nvim_get_current_win()
               local mode = vim.fn.mode()
-              if mode:match('n') then
-                local line = vim.fn.line('.')
-                require('opencode.api').add_visual_selection({ open_input = false }, { start = line, stop = line })
+              local buf = vim.api.nvim_get_current_buf()
+              local text
+
+              if mode == 'v' or mode == 'V' or mode == '\022' then
+                local current_pos = vim.fn.getpos('.')
+                local old_register = vim.fn.getreg('x')
+                local old_register_type = vim.fn.getregtype('x')
+
+                vim.cmd('normal! "xy')
+                text = vim.fn.getreg('x')
+
+                vim.fn.setreg('x', old_register, old_register_type)
+                vim.cmd('normal! gv')
+                vim.api.nvim_feedkeys(
+                  vim.api.nvim_replace_termcodes('<Esc>', true, false, true),
+                  'nx',
+                  true
+                )
+                vim.fn.setpos('.', current_pos)
               else
-                require('opencode.api').add_visual_selection({ open_input = false })
+                local line = vim.fn.line('.')
+                text = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
               end
+
+              if not text or not text:match('%S') then
+                vim.notify('No text selected', vim.log.levels.WARN)
+                return
+              end
+
+              local Promise = require('opencode.promise')
+
+              Promise.async(function()
+                require('opencode.services.session_runtime')
+                    .open({
+                      new_session = false,
+                    })
+                    :await()
+
+                require('opencode.ui.input_window')._append_to_input(text)
+
+                if vim.api.nvim_win_is_valid(current_win) then
+                  vim.api.nvim_set_current_win(current_win)
+                end
+
+                vim.cmd('stopinsert')
+              end)()
             end,
             mode = { 'n', 'v' },
+            desc = 'Paste selection into OpenCode input',
           },
 
           ['<leader>af'] = {
@@ -84,7 +127,8 @@ return {
               local ctx = context.get_context()
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
-              require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false }):await()
+              require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false })
+                  :await()
               require('opencode.services.agent_model').switch_to_mode('coworker'):await()
 
               for _, sel in ipairs(saved_selections) do
@@ -96,7 +140,7 @@ return {
             end)()
           end },
 
-          ['<leader>ov'] = { function ()
+          ['<leader>ov'] = { function()
             local state = require("opencode.state")
             local ui = require("opencode.ui.ui")
             local image_handler = require("opencode.image_handler")
@@ -143,7 +187,7 @@ return {
 
               vim.cmd("stopinsert")
             end)
-          end}
+          end }
         },
 
         input_window = {
