@@ -1,41 +1,41 @@
 return {
-  'saghen/blink.cmp',
+  "saghen/blink.cmp",
   lazy = false,
   dependencies = {
-    'rafamadriz/friendly-snippets',
+    "rafamadriz/friendly-snippets",
   },
 
-  version = '1.*',
+  version = "1.*",
 
-  ---@module 'blink.cmp'
+  ---@module "blink.cmp"
   ---@type blink.cmp.Config
   opts = {
     keymap = {
-      preset = 'default',
-      ['<c-g>'] = { 'show_documentation', 'hide_documentation', 'fallback' },
-      ['<space>'] = false,
+      preset = "default",
+      ["<c-g>"] = { "show_documentation", "hide_documentation", "fallback" },
+      ["<space>"] = false,
     },
 
     appearance = {
-      nerd_font_variant = 'mono'
+      nerd_font_variant = "mono"
     },
 
     completion = {
       menu = {
-        border = 'rounded',
+        border = "rounded",
       },
       documentation = {
         auto_show = false,
-        window = { border = 'rounded' },
+        window = { border = "rounded" },
       },
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets', 'buffer' },
+      default = { "lsp", "path", "snippets", "buffer" },
     },
 
     cmdline = {
-      keymap = { preset = 'inherit' },
+      keymap = { preset = "inherit" },
       completion = {
         menu = { auto_show = true },
         ghost_text = { enabled = false },
@@ -46,13 +46,13 @@ return {
   },
   opts_extend = { "sources.default" },
   config = function(_, opts)
-    require('blink.cmp').setup(opts)
+    require("blink.cmp").setup(opts)
 
-    vim.keymap.set('n', '<leader>cm', function()
-      local cfg = require('blink.cmp.config').completion.menu
+    vim.keymap.set("n", "<leader>cm", function()
+      local cfg = require("blink.cmp.config").completion.menu
       cfg.auto_show = not cfg.auto_show
-      local state = cfg.auto_show and 'shown' or 'hidden'
-      vim.notify('blink.cmp menu auto_show ' .. state, vim.log.levels.INFO)
-    end, { desc = 'Toggle blink.cmp menu auto_show' })
+      local state = cfg.auto_show and "shown" or "hidden"
+      vim.notify("blink.cmp menu auto_show " .. state, vim.log.levels.INFO)
+    end, { desc = "Toggle blink.cmp menu auto_show" })
   end,
 }

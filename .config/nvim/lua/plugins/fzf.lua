@@ -26,7 +26,7 @@ local function with_opencode_redirect(action)
           target = vim.api.nvim_get_current_win()
         end
         vim.api.nvim_set_current_win(target)
-        -- Patch the context so fzf's action opens into this window
+        -- Patch the context so the fzf action opens into this window
         opts.__CTX.winid = target
         opts.__CTX.bufnr = vim.api.nvim_win_get_buf(target)
       end

@@ -3,23 +3,23 @@ return {
   lazy = false,
   priority = 1000,
   config = function()
-    require('lualine').setup {
+    require("lualine").setup {
       options = {
-        theme = 'tokyonight'
+        theme = "tokyonight"
       },
       sections = {
         lualine_b = {
-          'branch'
+          "branch"
         },
         lualine_c = {
           {
-            'filename',
+            "filename",
             path = 1
           }
         },
         lualine_x = {
           {
-            'encoding'
+            "encoding"
           }
         }
       }

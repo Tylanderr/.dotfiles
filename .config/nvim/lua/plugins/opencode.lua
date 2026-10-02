@@ -7,13 +7,13 @@ return {
   },
   config = function()
     require("opencode").setup({
-      preferred_picker = 'fzf',
-      preferred_completion = 'blink',
+      preferred_picker = "fzf",
+      preferred_completion = "blink",
       default_global_keymaps = true,
-      default_mode = 'coworker',
+      default_mode = "coworker",
       default_system_prompt = nil,
-      keymap_prefix = '<leader>o',
-      opencode_executable = 'opencode',
+      keymap_prefix = "<leader>o",
+      opencode_executable = "opencode",
 
       context = {
         current_file = {
@@ -26,10 +26,10 @@ return {
 
       keymap = {
         editor = {
-          ['<C-\\>'] = {
+          ["<C-\\>"] = {
             function()
               local previous_win = vim.api.nvim_get_current_win()
-              local toggle_promise = require('opencode.api').toggle()
+              local toggle_promise = require("opencode.api").toggle()
 
               if vim.api.nvim_win_is_valid(previous_win) then
                 vim.api.nvim_set_current_win(previous_win)
@@ -38,98 +38,98 @@ return {
               return toggle_promise
             end,
           },
-          ['<leader>/'] = { 'quick_chat', mode = { 'n', 'x' } },
-          ['<leader>ot'] = { 'configure_variant' },
-          ['<leader>ods'] = false,
+          ["<leader>/"] = { "quick_chat", mode = { "n", "x" } },
+          ["<leader>ot"] = { "configure_variant" },
+          ["<leader>ods"] = false,
 
-          ['<leader>av'] = {
+          ["<leader>av"] = {
             function()
               local current_win = vim.api.nvim_get_current_win()
               local mode = vim.fn.mode()
               local buf = vim.api.nvim_get_current_buf()
               local text
 
-              if mode == 'v' or mode == 'V' or mode == '\022' then
-                local current_pos = vim.fn.getpos('.')
-                local old_register = vim.fn.getreg('x')
-                local old_register_type = vim.fn.getregtype('x')
+              if mode == "v" or mode == "V" or mode == "\022" then
+                local current_pos = vim.fn.getpos(".")
+                local old_register = vim.fn.getreg("x")
+                local old_register_type = vim.fn.getregtype("x")
 
-                vim.cmd('normal! "xy')
-                text = vim.fn.getreg('x')
+                vim.cmd("normal! \"xy")
+                text = vim.fn.getreg("x")
 
-                vim.fn.setreg('x', old_register, old_register_type)
-                vim.cmd('normal! gv')
+                vim.fn.setreg("x", old_register, old_register_type)
+                vim.cmd("normal! gv")
                 vim.api.nvim_feedkeys(
-                  vim.api.nvim_replace_termcodes('<Esc>', true, false, true),
-                  'nx',
+                  vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
+                  "nx",
                   true
                 )
-                vim.fn.setpos('.', current_pos)
+                vim.fn.setpos(".", current_pos)
               else
-                local line = vim.fn.line('.')
+                local line = vim.fn.line(".")
                 text = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
               end
 
-              if not text or not text:match('%S') then
-                vim.notify('No text selected', vim.log.levels.WARN)
+              if not text or not text:match("%S") then
+                vim.notify("No text selected", vim.log.levels.WARN)
                 return
               end
 
-              local Promise = require('opencode.promise')
+              local Promise = require("opencode.promise")
 
               Promise.async(function()
-                require('opencode.services.session_runtime')
+                require("opencode.services.session_runtime")
                     .open({
                       new_session = false,
                     })
                     :await()
 
-                require('opencode.ui.input_window')._append_to_input(text)
+                require("opencode.ui.input_window")._append_to_input(text)
 
                 if vim.api.nvim_win_is_valid(current_win) then
                   vim.api.nvim_set_current_win(current_win)
                 end
 
-                vim.cmd('stopinsert')
+                vim.cmd("stopinsert")
               end)()
             end,
-            mode = { 'n', 'v' },
-            desc = 'Paste selection into OpenCode input',
+            mode = { "n", "v" },
+            desc = "Paste selection into OpenCode input",
           },
 
-          ['<leader>af'] = {
+          ["<leader>af"] = {
             function()
               local file = vim.api.nvim_buf_get_name(0)
 
-              if file == '' then
-                vim.notify('Current buffer has no file to add', vim.log.levels.WARN)
+              if file == "" then
+                vim.notify("Current buffer has no file to add", vim.log.levels.WARN)
                 return
               end
 
-              require('opencode.context').add_file(file)
+              require("opencode.context").add_file(file)
             end,
-            mode = { 'n' },
+            mode = { "n" },
           },
 
-          ['<leader>oi'] = { function()
-            require('opencode.services.session_runtime').open({ new_session = false, focus = 'input', start_insert = false })
+          ["<leader>oi"] = { function()
+            require("opencode.services.session_runtime").open({ new_session = false, focus = "input", start_insert = false })
           end },
 
-          ['<leader>ox'] = { function()
-            require('opencode.context').unload_attachments()
+          ["<leader>ox"] = { function()
+            require("opencode.context").unload_attachments()
           end },
 
-          ['<leader>on'] = { function()
-            local Promise = require('opencode.promise')
+          ["<leader>on"] = { function()
+            local Promise = require("opencode.promise")
             Promise.async(function()
-              local context = require('opencode.context')
+              local context = require("opencode.context")
 
               local ctx = context.get_context()
               local saved_selections = vim.deepcopy(ctx.selections or {})
               local saved_files = vim.deepcopy(ctx.mentioned_files or {})
-              require('opencode.services.session_runtime').open({ new_session = true, focus = 'input', start_insert = false })
+              require("opencode.services.session_runtime").open({ new_session = true, focus = "input", start_insert = false })
                   :await()
-              require('opencode.services.agent_model').switch_to_mode('coworker'):await()
+              require("opencode.services.agent_model").switch_to_mode("coworker"):await()
 
               for _, sel in ipairs(saved_selections) do
                 context.add_selection(sel)
@@ -140,7 +140,7 @@ return {
             end)()
           end },
 
-          ['<leader>ov'] = { function()
+          ["<leader>ov"] = { function()
             local state = require("opencode.state")
             local ui = require("opencode.ui.ui")
             local image_handler = require("opencode.image_handler")
@@ -193,20 +193,20 @@ return {
         input_window = {
           ["j"] = { function() vim.cmd("normal! gj") end, mode = "n" },
           ["k"] = { function() vim.cmd("normal! gk") end, mode = "n" },
-          ['<leader>ods'] = false,
-          ['<S-tab>'] = { 'switch_mode', mode = { 'n' } },
-          ['<C-c>'] = {
+          ["<leader>ods"] = false,
+          ["<S-tab>"] = { "switch_mode", mode = { "n" } },
+          ["<C-c>"] = {
             function()
-              local ok, state = pcall(require, 'opencode.state')
+              local ok, state = pcall(require, "opencode.state")
               if ok and state.jobs.is_running() then
-                require('opencode.api').cancel()
+                require("opencode.api").cancel()
               end
             end,
-            mode = { 'n' },
+            mode = { "n" },
           },
         },
         output_window = {
-          ['<leader>ods'] = false,
+          ["<leader>ods"] = false,
         }
       },
 

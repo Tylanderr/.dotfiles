@@ -16,42 +16,42 @@ return {
     routes = {
       {
         filter = {
-          event = 'msg_show',
+          event = "msg_show",
           any = {
-            { find = '%d+L, %d+B' },
-            { find = '; after #%d+' },
-            { find = '; before #%d+' },
-            { find = '%d fewer lines' },
-            { find = '%d more lines' },
-            { find = 'Type  :qa' },
+            { find = "%d+L, %d+B" },
+            { find = "; after #%d+" },
+            { find = "; before #%d+" },
+            { find = "%d fewer lines" },
+            { find = "%d more lines" },
+            { find = "Type  :qa" },
 
             -- jdtls messages to ignore
-            { find = 'Publish Diagnostics' },
-            { find = 'Validate documents' },
-            { find = 'Building -' },
+            { find = "Publish Diagnostics" },
+            { find = "Validate documents" },
+            { find = "Building -" },
 
             -- lua_ls messages to ignore
-            { find = 'Diagnosing -' },
-            { find = 'Processing -' },
+            { find = "Diagnosing -" },
+            { find = "Processing -" },
 
             -- treesitter error
-            { find = 'nvim__redraw' },
+            { find = "nvim__redraw" },
           },
         },
         opts = { skip = true },
       },
       {
         filter = {
-          event = 'notify',
+          event = "notify",
           any = {
-            { find = 'is deprecated' },
-            { find = 'stack traceback' },
-            { find = 'No results found' }
+            { find = "is deprecated" },
+            { find = "stack traceback" },
+            { find = "No results found" }
           }
         },
       },
       {
-        filter = { event = 'notify' },
+        filter = { event = "notify" },
         view = "notify",
         opts = { replace = true, merge = false },
       },

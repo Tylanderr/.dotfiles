@@ -36,17 +36,17 @@ return {
     -- You can also use below = true here to to change the position of the printf
     -- statement (or set two remaps for either one). This remap must be made in normal mode.
     vim.keymap.set("n", "<leader>rp", function()
-      require('refactoring').debug.printf({ below = false, show_success_message = false })
+      require("refactoring").debug.printf({ below = false, show_success_message = false })
     end
     )
 
     vim.keymap.set({ "x", "n" }, "<leader>rv", function()
-      require('refactoring').debug.print_var({ show_success_message = false })
+      require("refactoring").debug.print_var({ show_success_message = false })
     end)
     -- Supports both visual and normal mode
 
     vim.keymap.set("n", "<leader>rc", function()
-      require('refactoring').debug.cleanup({ show_success_message = false })
+      require("refactoring").debug.cleanup({ show_success_message = false })
     end)
     -- Supports only normal mode
   end,

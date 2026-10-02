@@ -1,31 +1,31 @@
 return {
-  'neovim/nvim-lspconfig',
+  "neovim/nvim-lspconfig",
   lazy = false,
   dependencies = {
-    { 'mason-org/mason.nvim',   opts = { ui = { border = "rounded" } } },
-    { 'folke/lazydev.nvim',     ft = "lua",                            opts = {} },
-    { 'deathbeam/lspecho.nvim', opts = { echo = true } },
+    { "mason-org/mason.nvim",   opts = { ui = { border = "rounded" } } },
+    { "folke/lazydev.nvim",     ft = "lua",                            opts = {} },
+    { "deathbeam/lspecho.nvim", opts = { echo = true } },
   },
   config = function()
-    vim.api.nvim_create_autocmd('LspAttach', {
-      group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
       callback = function(event)
         local map = function(keys, func, desc)
-          vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+          vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
 
-        map('gd', function() require("fzf-lua").lsp_definitions() end, '[G]oto [D]efinition')
-        map('gr', function() require("fzf-lua").lsp_references() end, '[G]oto [R]eferences')
-        map('gi', function() require("fzf-lua").lsp_implementations() end, '[G]oto [I]mplementation')
-        map('gD', function() require("fzf-lua").lsp_declarations() end, '[G]oto [D]eclaration')
+        map("gd", function() require("fzf-lua").lsp_definitions() end, "[G]oto [D]efinition")
+        map("gr", function() require("fzf-lua").lsp_references() end, "[G]oto [R]eferences")
+        map("gi", function() require("fzf-lua").lsp_implementations() end, "[G]oto [I]mplementation")
+        map("gD", function() require("fzf-lua").lsp_declarations() end, "[G]oto [D]eclaration")
         map("gy", function() require("fzf-lua").lsp_typedefs() end, "Goto T[y]pe Definition")
 
-        map('K', function() vim.lsp.buf.hover({ border = 'rounded' }) end, 'Hover Documentation')
-        map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-        map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-        map('<leader>vd', function() vim.diagnostic.open_float() end, 'Open diagnostics float')
-        map('<leader>li', "<cmd>LspInfo<CR>", 'Open LspInfo')
-        map('<leader>lr', "<cmd>LspRestart<CR>", 'Restart LSP')
+        map("K", function() vim.lsp.buf.hover({ border = "rounded" }) end, "Hover Documentation")
+        map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+        map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+        map("<leader>vd", function() vim.diagnostic.open_float() end, "Open diagnostics float")
+        map("<leader>li", "<cmd>LspInfo<CR>", "Open LspInfo")
+        map("<leader>lr", "<cmd>LspRestart<CR>", "Restart LSP")
       end,
     })
 
@@ -36,23 +36,23 @@ return {
     end
 
     local active = {
-      'html',
-      'lua_ls',
+      "html",
+      "lua_ls",
     }
 
     local home_servers = {
-      'gopls',
-      'templ',
+      "gopls",
+      "templ",
     }
 
     local work_servers = {
-      'angularls',
-      'ansiblels',
-      'ts_ls',
-      'yamlls',
-      'nginx_language_server',
-      'pylsp',
-      -- 'copilot'
+      "angularls",
+      "ansiblels",
+      "ts_ls",
+      "yamlls",
+      "nginx_language_server",
+      "pylsp",
+      -- "copilot"
     }
 
     if vim.fn.hostname() == "tjh" then

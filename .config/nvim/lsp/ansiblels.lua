@@ -1,12 +1,12 @@
 return {
-  cmd = { 'ansible-language-server', '--stdio' },
+  cmd = { "ansible-language-server", "--stdio" },
   settings = {
     ansible = {
       python = {
-        interpreterPath = 'python',
+        interpreterPath = "python",
       },
       ansible = {
-        path = 'ansible',
+        path = "ansible",
       },
       executionEnvironment = {
         enabled = false,
@@ -15,11 +15,11 @@ return {
         enabled = true,
         lint = {
           enabled = true,
-          path = 'ansible-lint',
+          path = "ansible-lint",
         },
       },
     },
   },
-  filetypes = { 'yaml.ansible' },
-  root_markers = { 'ansible.cfg', '.ansible-lint' },
+  filetypes = { "yaml.ansible" },
+  root_markers = { "ansible.cfg", ".ansible-lint" },
 }

@@ -84,7 +84,7 @@ return {
             fold.options.on_open(fold, instance.buffer.ui)
           else
             local start, _ = fold:row_range_abs()
-            -- Move cursor to the fold's first row so normal! za acts on the
+            -- Move cursor to the first row of the fold so normal! za acts on the
             -- correct fold rather than any nested fold under the cursor
             instance.buffer:move_cursor(start)
             local ok, _ = pcall(function() vim.cmd("normal! za") end)
@@ -100,12 +100,12 @@ return {
     vim.keymap.set("n", "<leader>gt", "<cmd>Neogit<CR>")
     vim.keymap.set("n", "<leader>gb", "<cmd>Neogit branch<CR>")
     vim.keymap.set("n", "<leader>gz", "<cmd>Neogit stash<CR>")
-    vim.keymap.set('n', '<leader>gB', '<cmd>Git blame<CR>')
+    vim.keymap.set("n", "<leader>gB", "<cmd>Git blame<CR>")
     vim.keymap.set("n", "<leader>gp", "<cmd>Git push<CR>")
     vim.keymap.set("n", "<leader>gP", "<cmd>Git push --force<CR>")
     vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
     vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
-    vim.keymap.set('n', '<leader>gc', ':Git commit -m ""<Left>')
+    vim.keymap.set("n", "<leader>gc", ":Git commit -m \"\"<Left>")
     vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
 
     vim.api.nvim_create_autocmd("User", {
