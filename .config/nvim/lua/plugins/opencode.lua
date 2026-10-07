@@ -193,6 +193,7 @@ return {
           ["j"] = { function() vim.cmd("normal! gj") end, mode = "n" },
           ["k"] = { function() vim.cmd("normal! gk") end, mode = "n" },
           ["<leader>ods"] = false,
+          ["<M-m>"] = false,
           ["<S-tab>"] = { "switch_mode", mode = { "n" } },
           ["<C-c>"] = {
             function()

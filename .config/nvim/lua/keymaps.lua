@@ -21,6 +21,7 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "q", "<nop>")
+vim.keymap.set("n", "<M-m>", "<nop>")
 vim.keymap.set("n", "<c-q>", "<nop>")
 vim.keymap.set("n", "<c-f>", "<nop>")
 vim.keymap.set("n", "<leader>qu", "<cmd>q<CR>")

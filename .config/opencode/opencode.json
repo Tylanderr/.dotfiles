@@ -54,7 +54,7 @@
     },
 
     "build": {
-      "disable": true,
+      "disable": false,
       "permission": {
         "edit": "allow"
       }
@@ -69,3 +69,4 @@
     }
   }
 }
+
