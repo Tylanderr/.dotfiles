@@ -108,14 +108,14 @@ return {
           },
 
           ["<leader>oi"] = { function()
-            require("opencode.services.session_runtime").open({ new_session = false, focus = "input", start_insert = false })
-            require("opencode.services.agent_model").switch_to_mode("coworker")
+            require("opencode.services.session_runtime").open({ new_session = false, focus = "input", start_insert = false }):await()
+            require("opencode.services.agent_model").switch_to_mode("coworker"):await()
           end },
 
           ["<leader>oo"] = {
             function()
-              require("opencode.services.session_runtime").open({ new_session = false, focus = "output", start_insert = false })
-              require("opencode.services.agent_model").switch_to_mode("coworker")
+              require("opencode.services.session_runtime").open({ new_session = false, focus = "output", start_insert = false }):await()
+              require("opencode.services.agent_model").switch_to_mode("coworker"):await()
 
               local state = require("opencode.state")
               local observation = state.session.active_observation()
