@@ -78,11 +78,7 @@ return {
               local Promise = require("opencode.promise")
 
               Promise.async(function()
-                require("opencode.services.session_runtime")
-                    .open({
-                      new_session = false,
-                    })
-                    :await()
+                require("opencode.services.session_runtime").open({ new_session = false, }):await()
 
                 require("opencode.ui.input_window")._append_to_input(text)
 
@@ -113,7 +109,37 @@ return {
 
           ["<leader>oi"] = { function()
             require("opencode.services.session_runtime").open({ new_session = false, focus = "input", start_insert = false })
+            require("opencode.services.agent_model").switch_to_mode("coworker")
           end },
+
+          ["<leader>oo"] = {
+            function()
+              require("opencode.services.session_runtime").open({ new_session = false, focus = "output", start_insert = false })
+              require("opencode.services.agent_model").switch_to_mode("coworker")
+
+              local state = require("opencode.state")
+              local observation = state.session.active_observation()
+
+              if not observation then
+                vim.notify("OpenCode session is not active", vim.log.levels.WARN)
+                return
+              end
+
+              local ok, err = pcall(function()
+                observation:_start_resource("messages")
+              end)
+
+              if not ok then
+                vim.notify(
+                  "Failed to refresh OpenCode output: " .. tostring(err),
+                  vim.log.levels.ERROR
+                )
+                return
+              end
+            end,
+            mode = { "n" },
+            desc = "Open and refresh OpenCode output",
+          },
 
           ["<leader>ox"] = { function()
             require("opencode.context").unload_attachments()
@@ -229,8 +255,7 @@ return {
       },
     })
 
-    -- Reset opencode windows to their default width (30%)
-    vim.keymap.set("n", "<leader>or", function()
+    vim.keymap.set("n", "<leader>ow", function()
       local opencode_fts = { opencode = true, opencode_output = true, opencode_footer = true }
       local default_width = math.floor(vim.o.columns * 0.33)
 
