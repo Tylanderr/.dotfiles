@@ -62,6 +62,8 @@
 
     "coworker": {
       "mode": "primary",
+      "model": "github-copilot/gpt-5.6-luna",
+      "reasoningEffort": "high",
       "description": "Custom agent to act as a coworker",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
     }
