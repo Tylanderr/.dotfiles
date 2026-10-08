@@ -100,12 +100,43 @@ return {
     end
 
     local function open_input()
-      async(function()
-        open_session({
-          focus = "input",
-          start_insert = false,
-        })
+      Promise.async(function()
+        local state = require("opencode.state")
+        local ui = require("opencode.ui.ui")
+
+        open_session({ focus = "input", start_insert = false })
         switch_to_coworker()
+
+        local observation = state.session.active_observation()
+        if not observation then
+          error("OpenCode session is not active")
+        end
+
+        if observation:read().sync.session.state ~= "current" then
+          observation:_start_resource("session")
+        end
+
+        for _ = 1, 60 do
+          if state.session.active_observation() ~= observation then
+            return
+          end
+
+          local sync = observation:read().sync.session
+          if sync.state == "current" then
+            ui.focus_input({ restore_position = true, start_insert = false })
+            return
+          end
+
+          if sync.state == "error" or sync.state == "unsupported" then
+            error("Session metadata unavailable: " .. vim.inspect(sync))
+          end
+
+          Promise.delay(50):await()
+        end
+
+        error("Timed out waiting for OpenCode session metadata")
+      end)():catch(function(err)
+        vim.notify("OpenCode input: " .. tostring(err), vim.log.levels.ERROR)
       end)
     end
 
