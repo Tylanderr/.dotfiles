@@ -154,16 +154,7 @@ return {
           return
         end
 
-        local ok, err = pcall(function()
-          observation:_start_resource("messages")
-        end)
-
-        if not ok then
-          vim.notify(
-            "Failed to refresh OpenCode output: " .. tostring(err),
-            vim.log.levels.ERROR
-          )
-        end
+        observation:_start_resource("messages")
       end)
     end
 
