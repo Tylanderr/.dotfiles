@@ -44,41 +44,15 @@ return {
       return toggle_promise
     end
 
-    local function paste_current_text()
+    local function add_current_text_as_context()
       local current_win = api.nvim_get_current_win()
-      local mode = fn.mode()
-      local buf = api.nvim_get_current_buf()
-      local text
 
-      if mode == "v" or mode == "V" or mode == "\022" then
-        local current_pos = fn.getpos(".")
-        local old_register = fn.getreg("x")
-        local old_register_type = fn.getregtype("x")
-
-        vim.cmd('normal! "xy')
-        text = fn.getreg("x")
-
-        fn.setreg("x", old_register, old_register_type)
-        vim.cmd("normal! gv")
-        api.nvim_feedkeys(
-          api.nvim_replace_termcodes("<Esc>", true, false, true),
-          "nx",
-          true
-        )
-        fn.setpos(".", current_pos)
-      else
-        local line = fn.line(".")
-        text = api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
-      end
-
-      if not text or not text:match("%S") then
-        vim.notify("No text selected", vim.log.levels.WARN)
+      if not context.add_visual_selection() then
         return
       end
 
       async(function()
         open_session({ new_session = false })
-        require("opencode.ui.input_window")._append_to_input(text)
 
         if api.nvim_win_is_valid(current_win) then
           api.nvim_set_current_win(current_win)
@@ -341,7 +315,7 @@ return {
           ["<C-\\>"] = { toggle_panel },
           ["<leader>/"] = { "quick_chat", mode = { "n", "x" } },
           ["<leader>ot"] = { "configure_variant" },
-          ["<leader>av"] = { paste_current_text, mode = { "n", "v" }, desc = "Paste selection into OpenCode input", },
+          ["<leader>av"] = { add_current_text_as_context, mode = { "n", "v" }, desc = "Add selection as OpenCode context", },
           ["<leader>af"] = { add_current_file, mode = { "n" } },
           ["<leader>oi"] = { open_input, mode = { "n" } },
           ["<leader>oo"] = { open_output, mode = { "n" }, desc = "Open and refresh OpenCode output", },
