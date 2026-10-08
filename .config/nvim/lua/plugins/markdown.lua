@@ -1,6 +1,6 @@
 return {
   "MeanderingProgrammer/render-markdown.nvim",
-  event = "VeryLazy",
+  --event = "VeryLazy",
   config = function()
     local render_markdown = require("render-markdown")
     render_markdown.setup({
