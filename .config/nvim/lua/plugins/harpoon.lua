@@ -8,6 +8,24 @@ return {
 
     harpoon:setup()
 
+    local function select_harpoon(index)
+      local ok, err = pcall(function()
+        harpoon:list():select(index)
+      end)
+
+      if ok then
+        return
+      end
+
+      local message = tostring(err)
+      if message:match("E1513") or message:match("winfixbuf") then
+        vim.notify("Navigation blocked by a fixed-buffer window", vim.log.levels.WARN)
+        return
+      end
+
+      error(err, 0)
+    end
+
     vim.keymap.set("n", "<leader>ha", function()
       harpoon:list():add()
     end)
@@ -16,16 +34,16 @@ return {
     end)
 
     vim.keymap.set("n", "<C-h>", function()
-      harpoon:list():select(1)
+      select_harpoon(1)
     end)
     vim.keymap.set("n", "<C-j>", function()
-      harpoon:list():select(2)
+      select_harpoon(2)
     end)
     vim.keymap.set("n", "<C-k>", function()
-      harpoon:list():select(3)
+      select_harpoon(3)
     end)
     vim.keymap.set("n", "<C-l>", function()
-      harpoon:list():select(4)
+      select_harpoon(4)
     end)
     vim.keymap.set("n", "<leader><C-h>", function()
       harpoon:list():replace_at(1)
