@@ -16,6 +16,16 @@ return {
     routes = {
       {
         filter = {
+          event = { "msg_show", "notify" },
+          find = 'Error in decoration provider "line" %(ns=nvim%.treesitter%.highlighter%):',
+          cond = function(message)
+            return message:content():find("Index out of bounds", 1, true) ~= nil
+          end,
+        },
+        opts = { skip = true },
+      },
+      {
+        filter = {
           event = "msg_show",
           any = {
             { find = "%d+L, %d+B" },
