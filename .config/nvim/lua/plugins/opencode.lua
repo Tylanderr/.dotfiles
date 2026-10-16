@@ -140,7 +140,6 @@ return {
 
         open_session({
           new_session = true,
-          focus = "input",
           start_insert = false,
         })
         switch_to_coworker()
