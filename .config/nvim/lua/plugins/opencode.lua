@@ -343,6 +343,8 @@ return {
         },
         output_window = {
           ["<leader>ods"] = false,
+          ["j"] = { function() vim.cmd("normal! gj") end, mode = "n" },
+          ["k"] = { function() vim.cmd("normal! gk") end, mode = "n" },
         }
       },
 

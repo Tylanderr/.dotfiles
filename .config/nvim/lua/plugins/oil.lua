@@ -73,7 +73,8 @@ return {
         end
       end
 
-      require("oil").open_float()
+      -- require("oil").open_float()
+      require("oil").open()
     end, { desc = "Open Oil" })
   end,
 }
