@@ -35,13 +35,11 @@ return {
 
     local function toggle_panel()
       local previous_win = api.nvim_get_current_win()
-      local toggle_promise = require("opencode.api").toggle()
-
-      if api.nvim_win_is_valid(previous_win) then
-        api.nvim_set_current_win(previous_win)
-      end
-
-      return toggle_promise
+      return require("opencode.api").toggle():finally(function()
+        if api.nvim_win_is_valid(previous_win) then
+          api.nvim_set_current_win(previous_win)
+        end
+      end)
     end
 
     local function add_current_text_as_context()
@@ -53,7 +51,6 @@ return {
 
       async(function()
         open_session({ new_session = false })
-
         if api.nvim_win_is_valid(current_win) then
           api.nvim_set_current_win(current_win)
         end
