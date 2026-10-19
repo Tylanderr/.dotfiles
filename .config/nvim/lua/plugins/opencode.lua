@@ -1,7 +1,7 @@
 return {
   "sudo-tee/opencode.nvim",
   event = "VeryLazy",
-  -- commit = "8edc19ac64e3075d4d68e49ef6846dec562ed316",
+  commit = "494e474f58c45218a4cf7c7d2e76b0408de09daa",
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
@@ -161,6 +161,7 @@ return {
       local state = require("opencode.state")
       local ui = require("opencode.ui.ui")
       local image_handler = require("opencode.image_handler")
+      local mention = require("opencode.ui.mention")
 
       ui.focus_input({ restore_position = true, start_insert = false })
 
@@ -172,8 +173,15 @@ return {
 
       local win = windows.input_win
       local buf = windows.input_buf
-      if not win or not buf then
+      if not win or not buf or not api.nvim_win_is_valid(win) or not api.nvim_buf_is_valid(buf) then
         vim.notify("OpenCode input window is not available", vim.log.levels.WARN)
+        return
+      end
+
+      -- Save the image before changing the input buffer.
+      local image_path = image_handler.save_clipboard_image()
+      if not image_path then
+        vim.notify("No image found in clipboard.", vim.log.levels.WARN)
         return
       end
 
@@ -187,12 +195,23 @@ return {
       })
       api.nvim_win_set_cursor(win, { row + 1, 0 })
 
-      if not image_handler.paste_image_from_clipboard() then
-        return
-      end
+      -- Match the current plugin's paste workflow: insert a mention
+      -- and register the saved image as context.
+      local name = fn.fnamemodify(image_path, ":t")
+      mention.mention(function(mention_cb)
+        mention_cb(name)
+        context.add_file(image_path)
+      end)
 
-      -- Image insertion is scheduled by opencode.nvim, so wait for it.
+      -- Mention insertion is scheduled by opencode.nvim, so run afterward.
       vim.schedule(function()
+        if not api.nvim_win_is_valid(win) or not api.nvim_buf_is_valid(buf) then
+          return
+        end
+        if api.nvim_win_get_buf(win) ~= buf then
+          return
+        end
+
         local image_row = row + 1
 
         -- Insert a new line after the image mention.
@@ -380,3 +399,4 @@ return {
     vim.keymap.set("n", "<leader>wo", close_other_windows)
   end,
 }
+
