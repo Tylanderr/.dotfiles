@@ -308,7 +308,7 @@ return {
     end
 
     require("opencode").setup({
-      preferred_picker = "fzf",
+      preferred_picker = "mini.pick",
       preferred_completion = "blink",
       default_global_keymaps = true,
       default_mode = "coworker",
@@ -366,7 +366,7 @@ return {
       ui = {
         window_width = 0.33,
         zoom_width = 0.8,
-        picker_width = 0.6,
+        picker_width = false,
 
         input = {
           text = {
@@ -396,4 +396,3 @@ return {
     vim.keymap.set("n", "<leader>wo", close_other_windows)
   end,
 }
-

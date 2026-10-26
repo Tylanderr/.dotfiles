@@ -14,11 +14,11 @@ return {
           vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
 
-        map("gd", function() require("fzf-lua").lsp_definitions() end, "[G]oto [D]efinition")
-        map("gr", function() require("fzf-lua").lsp_references() end, "[G]oto [R]eferences")
-        map("gi", function() require("fzf-lua").lsp_implementations() end, "[G]oto [I]mplementation")
-        map("gD", function() require("fzf-lua").lsp_declarations() end, "[G]oto [D]eclaration")
-        map("gy", function() require("fzf-lua").lsp_typedefs() end, "Goto T[y]pe Definition")
+        map("gd", function() require("mini.extra").pickers.lsp({ scope = "definition" }) end, "[G]oto [D]efinition")
+        map("gr", function() require("mini.extra").pickers.lsp({ scope = "references" }) end, "[G]oto [R]eferences")
+        map("gi", function() require("mini.extra").pickers.lsp({ scope = "implementation" }) end, "[G]oto [I]mplementation")
+        map("gD", function() require("mini.extra").pickers.lsp({ scope = "declaration" }) end, "[G]oto [D]eclaration")
+        map("gy", function() require("mini.extra").pickers.lsp({ scope = "type_definition" }) end, "Goto T[y]pe Definition")
 
         map("K", function() vim.lsp.buf.hover({ border = "rounded" }) end, "Hover Documentation")
         map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")

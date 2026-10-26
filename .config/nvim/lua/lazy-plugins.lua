@@ -4,7 +4,7 @@ require("lazy").setup({
     { import = "plugins.blink" },
     { import = "plugins.dadbod" },
     { import = "plugins.diffview" },
-    { import = "plugins.fzf" },
+    { import = "plugins.fff" },
     { import = "plugins.harpoon" },
     { import = "plugins.indent" },
     { import = "plugins.java" },
