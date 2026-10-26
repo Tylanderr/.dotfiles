@@ -1,14 +1,37 @@
+local neogit_open_context
+
 return {
   "NeogitOrg/neogit",
-  event = "VeryLazy",
+  cmd = { "Neogit" },
+  keys = {
+    { "<leader>gt", "<cmd>Neogit<CR>", mode = "n", desc = "Neogit" },
+    { "<leader>gb", "<cmd>Neogit branch<CR>", mode = "n", desc = "Neogit branches" },
+    { "<leader>gz", "<cmd>Neogit stash<CR>", mode = "n", desc = "Neogit stash" },
+  },
+  init = function()
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "FugitiveChanged",
+      callback = function()
+        if package.loaded.neogit then
+          require("neogit").dispatch_refresh()
+        end
+      end,
+    })
+  end,
   commit = "d93d7813cbd7acc44d2b058490c399ab84bf8d21",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "tpope/vim-fugitive",
   },
   config = function()
-    local neogit_open_context
-
+    vim.keymap.set("n", "<leader>gs", function()
+      local win = vim.api.nvim_get_current_win()
+      local ok, ui = pcall(require, "opencode.ui.ui")
+      neogit_open_context = {
+        tabpage = vim.api.nvim_get_current_tabpage(),
+        redirect = ok and ui.is_opencode_window(win),
+      }
+      vim.cmd("Neogit kind=floating")
+    end, { desc = "Neogit status" })
     local function is_opencode_window(win)
       local ok, ui = pcall(require, "opencode.ui.ui")
       return ok and ui.is_opencode_window(win)
@@ -143,30 +166,5 @@ return {
       end,
     })
 
-    vim.keymap.set("n", "<leader>gs", function()
-      local win = vim.api.nvim_get_current_win()
-      neogit_open_context = {
-        tabpage = vim.api.nvim_get_current_tabpage(),
-        redirect = is_opencode_window(win),
-      }
-      vim.cmd("Neogit kind=floating")
-    end)
-    vim.keymap.set("n", "<leader>gt", "<cmd>Neogit<CR>")
-    vim.keymap.set("n", "<leader>gb", "<cmd>Neogit branch<CR>")
-    vim.keymap.set("n", "<leader>gz", "<cmd>Neogit stash<CR>")
-    vim.keymap.set("n", "<leader>gB", "<cmd>Git blame<CR>")
-    vim.keymap.set("n", "<leader>gp", "<cmd>Git push<CR>")
-    vim.keymap.set("n", "<leader>gP", "<cmd>Git push --force<CR>")
-    vim.keymap.set("n", "<leader>gu", "<cmd>Git pull --rebase<CR>")
-    vim.keymap.set("n", "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>");
-    vim.keymap.set("n", "<leader>gc", ":Git commit -m \"\"<Left>")
-    vim.keymap.set("n", "<leader>go", ":Git push -u origin ");
-
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "FugitiveChanged",
-      callback = function()
-        require("neogit").dispatch_refresh()
-      end,
-    })
   end
 }

@@ -287,7 +287,8 @@ return {
       if focused_is_opencode and ok then
         local leftmost_col = math.huge
         for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
-          if not ui.is_opencode_window(win) then
+          local config = api.nvim_win_get_config(win)
+          if config.relative == "" and not ui.is_opencode_window(win) then
             local position = api.nvim_win_get_position(win)
             if position[2] < leftmost_col then
               leftmost_col = position[2]
@@ -297,7 +298,7 @@ return {
         end
       end
 
-      for _, win in ipairs(api.nvim_list_wins()) do
+      for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
         if win ~= current_win and win ~= leftmost then
           local buf = api.nvim_win_get_buf(win)
           if not opencode_filetypes[vim.bo[buf].filetype] then

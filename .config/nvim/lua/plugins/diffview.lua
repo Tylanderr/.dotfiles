@@ -1,6 +1,13 @@
 return {
   "sindrets/diffview.nvim",
-  event = "VeryLazy",
+  cmd = {
+    "DiffviewOpen",
+    "DiffviewClose",
+    "DiffviewFileHistory",
+    "DiffviewToggleFiles",
+    "DiffviewFocusFiles",
+    "DiffviewRefresh",
+  },
   opts = {
     file_panel = {
       listing_style = "tree",

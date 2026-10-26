@@ -1,6 +1,6 @@
 return {
   "MeanderingProgrammer/render-markdown.nvim",
-  --event = "VeryLazy",
+  ft = { "markdown", "opencode_output" },
   config = function()
     local render_markdown = require("render-markdown")
     render_markdown.setup({
@@ -14,28 +14,40 @@ return {
 
     local markdown_render_enabled = true
 
-    local function set_markdown_render_state(buf)
+    local function set_markdown_render_state(buf, attach)
       if not vim.api.nvim_buf_is_valid(buf) or not vim.api.nvim_buf_is_loaded(buf) then
         return
       end
 
       local ft = vim.bo[buf].filetype
-      if ft == "opencode_output" then
-        vim.api.nvim_buf_call(buf, function()
-          render_markdown.set_buf(true)
-        end)
-      elseif ft == "markdown" then
-        vim.api.nvim_buf_call(buf, function()
-          render_markdown.set_buf(markdown_render_enabled)
-        end)
+      if ft ~= "markdown" and ft ~= "opencode_output" then
+        return
+      end
+
+      local manager = require("render-markdown.core.manager")
+      if not manager.attached(buf) and attach then
+        manager.attach(buf)
+      end
+
+      if not manager.attached(buf) then
+        return
+      end
+
+      local desired = ft == "opencode_output" or markdown_render_enabled
+      local current = require("render-markdown.state").get(buf).enabled
+      if current ~= desired then
+        require("render-markdown.core.manager").set_buf(buf, desired)
       end
     end
 
     vim.keymap.set("n", "<leader>mr", function()
       markdown_render_enabled = not markdown_render_enabled
+      render_markdown.set(markdown_render_enabled)
 
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        set_markdown_render_state(buf)
+        if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype == "opencode_output" then
+          set_markdown_render_state(buf, false)
+        end
       end
 
       local state = markdown_render_enabled and "enabled" or "disabled"
@@ -46,8 +58,16 @@ return {
     vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
       group = markdown_render_group,
       callback = function(args)
-        set_markdown_render_state(args.buf)
+        vim.schedule(function()
+          set_markdown_render_state(args.buf, true)
+        end)
       end,
     })
+
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      vim.schedule(function()
+        set_markdown_render_state(buf, true)
+      end)
+    end
   end,
 }

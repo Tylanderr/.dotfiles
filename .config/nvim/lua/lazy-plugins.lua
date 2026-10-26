@@ -5,6 +5,7 @@ require("lazy").setup({
     { import = "plugins.dadbod" },
     { import = "plugins.diffview" },
     { import = "plugins.fff" },
+    { import = "plugins.fugitive" },
     { import = "plugins.harpoon" },
     { import = "plugins.indent" },
     { import = "plugins.java" },

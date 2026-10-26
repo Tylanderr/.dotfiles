@@ -7,9 +7,23 @@ return {
     auto_install = true,
     highlight = {
       enable = true,
+      disable = function(_, bufnr)
+        local lines = vim.api.nvim_buf_line_count(bufnr)
+        return lines > 20000 or vim.api.nvim_buf_get_offset(bufnr, lines) > 1024 * 1024
+      end,
       additional_vim_regex_highlighting = { "ruby" },
     },
-    indent = { enable = true, disable = { "ruby" } },
+    indent = {
+      enable = true,
+      disable = function(lang, bufnr)
+        if lang == "ruby" then
+          return true
+        end
+
+        local lines = vim.api.nvim_buf_line_count(bufnr)
+        return lines > 20000 or vim.api.nvim_buf_get_offset(bufnr, lines) > 1024 * 1024
+      end,
+    },
   },
   config = function(_, opts)
     ---@diagnostic disable-next-line: missing-fields
