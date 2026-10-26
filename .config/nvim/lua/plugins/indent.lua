@@ -11,10 +11,7 @@ return {
     enabled = false,
     exclude = {
       filetypes = {
-        "java",
-        "typescript",
         "markdown",
-        "go",
         "lazy",
         "dbout",
         "mason",
