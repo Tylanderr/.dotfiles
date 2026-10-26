@@ -14,7 +14,7 @@ return {
 
     local markdown_render_enabled = true
 
-    local function set_markdown_render_state(buf, attach)
+    local function set_markdown_render_state(buf)
       if not vim.api.nvim_buf_is_valid(buf) or not vim.api.nvim_buf_is_loaded(buf) then
         return
       end
@@ -24,11 +24,16 @@ return {
         return
       end
 
-      local manager = require("render-markdown.core.manager")
-      if not manager.attached(buf) and attach then
-        manager.attach(buf)
+      for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+        vim.wo[win].wrap = true
+        vim.wo[win].linebreak = true
+        vim.wo[win].breakindent = true
       end
 
+      vim.keymap.set("n", "j", "gj", { buffer = buf, desc = "Move down by display line" })
+      vim.keymap.set("n", "k", "gk", { buffer = buf, desc = "Move up by display line" })
+
+      local manager = require("render-markdown.core.manager")
       if not manager.attached(buf) then
         return
       end
@@ -46,7 +51,7 @@ return {
 
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype == "opencode_output" then
-          set_markdown_render_state(buf, false)
+          set_markdown_render_state(buf)
         end
       end
 
@@ -59,15 +64,16 @@ return {
       group = markdown_render_group,
       callback = function(args)
         vim.schedule(function()
-          set_markdown_render_state(args.buf, true)
+          set_markdown_render_state(args.buf)
         end)
       end,
     })
 
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
       vim.schedule(function()
-        set_markdown_render_state(buf, true)
+        set_markdown_render_state(buf)
       end)
     end
   end,
 }
+
