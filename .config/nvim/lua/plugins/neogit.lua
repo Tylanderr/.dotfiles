@@ -4,6 +4,7 @@ return {
   "NeogitOrg/neogit",
   cmd = { "Neogit" },
   keys = {
+    { "<leader>gs", mode = "n", desc = "Neogit status" },
     { "<leader>gt", "<cmd>Neogit<CR>", mode = "n", desc = "Neogit" },
     { "<leader>gb", "<cmd>Neogit branch<CR>", mode = "n", desc = "Neogit branches" },
     { "<leader>gz", "<cmd>Neogit stash<CR>", mode = "n", desc = "Neogit stash" },
