@@ -1,11 +1,8 @@
 return {
   "dmtrKovalenko/fff",
   build = function()
-    -- downloads a prebuilt binary or falls back to cargo build
     require("fff.download").download_or_build_binary()
   end,
-  -- for nixos:
-  -- build = "nix run .#release",
   opts = {
     layout = {
       prompt_position = "top",
@@ -59,7 +56,7 @@ return {
       end,
     },
   },
-  lazy = false, -- the plugin lazy-initialises itself
+  lazy = false,
   keys = {
     { "<leader>ff", function() require("fff").find_files({ layout = { height = 0.6, width = 0.4 }, preview = { enabled = false }, }) end, desc = "Find files", nowait = true, },
     { "<leader>fg", function() require("fff").live_grep() end, desc = "Live grep", nowait = true, },
