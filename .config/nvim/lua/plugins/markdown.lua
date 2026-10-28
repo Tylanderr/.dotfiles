@@ -14,6 +14,39 @@ return {
 
     local markdown_render_enabled = true
 
+    local function add_missing_task_checkboxes(buf)
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      local changed = false
+      local added = 0
+
+      for i, line in ipairs(lines) do
+        local prefix = line:match("^(%s*%-%s+)")
+          or line:match("^(%s*%*%s+)")
+          or line:match("^(%s*%+%s+)")
+          or line:match("^(%s*%d+[.)]%s+)")
+
+        if prefix then
+          local body = line:sub(#prefix + 1)
+          local has_checkbox =
+            body:match("^%[[ xX]%]%s") ~= nil
+            or body:match("^%[[ xX]%]$") ~= nil
+
+          if body:match("%S") and not has_checkbox then
+            lines[i] = prefix .. "[ ] " .. body
+            changed = true
+            added = added + 1
+          end
+        end
+      end
+
+      if changed then
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+        vim.notify("Added " .. added .. " checkbox(es)", vim.log.levels.INFO)
+      else
+        vim.notify("No unchecked list items found", vim.log.levels.INFO)
+      end
+    end
+
     local function set_markdown_render_state(buf)
       if not vim.api.nvim_buf_is_valid(buf) or not vim.api.nvim_buf_is_loaded(buf) then
         return
@@ -28,6 +61,15 @@ return {
         vim.wo[win].wrap = true
         vim.wo[win].linebreak = true
         vim.wo[win].breakindent = true
+      end
+
+      if ft == "markdown" then
+        vim.keymap.set("n", "<leader>mt", function()
+          add_missing_task_checkboxes(buf)
+        end, {
+          buffer = buf,
+          desc = "Add checkboxes to Markdown list items",
+        })
       end
 
       vim.keymap.set("n", "j", "gj", { buffer = buf, desc = "Move down by display line" })
