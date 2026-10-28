@@ -42,8 +42,9 @@
     },
 
     "external_directory": {
+      "*": "deny",
       "/home/tyler/projects/*": "allow",
-      "/home/tyler/*": "allow"
+      "/home/tyler/.local/*": "allow",
     }
   },
 
@@ -57,10 +58,7 @@
     "build": {
       "disable": false,
       "permission": {
-        "edit": {
-          "*": "deny",
-          "/home/tyler/projects/**": "allow"
-        },
+        "edit": "allow",
         "bash": "allow",
         "task": "allow"
       }
@@ -75,3 +73,4 @@
     }
   }
 }
+

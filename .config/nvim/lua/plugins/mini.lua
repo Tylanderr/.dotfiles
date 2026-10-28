@@ -8,7 +8,14 @@ return {
       require("mini.extra").setup()
       require("mini.pick").setup({
         mappings = {
+          choose_in_split = "",
+          choose_in_tabpage = "",
+          choose_in_vsplit = "",
           scroll_down = "",
+          scroll_left = "",
+          scroll_right = "",
+          move_start = "",
+          paste = "",
         },
         window = {
           config = function()
