@@ -16,6 +16,24 @@ return {
           scroll_right = "",
           move_start = "",
           paste = "",
+          send_to_quickfix = {
+            char = "<C-q>",
+            func = function()
+              local pick = require("mini.pick")
+              local matches = pick.get_picker_matches() or {}
+              local marked = matches.marked or {}
+              local items = #marked > 0 and marked or (matches.all or {})
+
+              if #items == 0 then
+                vim.notify("No matches to send to quickfix", vim.log.levels.WARN)
+                return false
+              end
+
+              pick.default_choose_marked(items)
+              return true
+            end,
+          },
+
         },
         window = {
           config = function()
