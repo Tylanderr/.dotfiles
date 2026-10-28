@@ -14,7 +14,39 @@ return {
           vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
 
-        map("gd", function() require("mini.extra").pickers.lsp({ scope = "definition" }) end, "[G]oto [D]efinition")
+        map("gd", function()
+          vim.lsp.buf.definition({
+            on_list = function(list)
+              local items = list.items
+
+              if #items == 1 then
+                local item = items[1]
+                local bufnr = item.bufnr or vim.fn.bufadd(item.filename)
+
+                vim.api.nvim_win_set_buf(0, bufnr)
+                vim.api.nvim_win_set_cursor(0, { item.lnum, item.col - 1 })
+                return
+              end
+
+              if #items > 1 then
+                local picker_items = vim.tbl_map(function(item)
+                  return {
+                    path = item.filename,
+                    bufnr = item.bufnr,
+                    lnum = item.lnum,
+                    col = item.col,
+                    text = item.text,
+                  }
+                end, items)
+
+                require("mini.pick").start({
+                  source = { items = picker_items, name = list.title },
+                })
+              end
+            end,
+          })
+        end, "[G]oto [D]efinition")
+
         map("gr", function() require("mini.extra").pickers.lsp({ scope = "references" }) end, "[G]oto [R]eferences")
         map("gi", function() require("mini.extra").pickers.lsp({ scope = "implementation" }) end, "[G]oto [I]mplementation")
         map("gD", function() require("mini.extra").pickers.lsp({ scope = "declaration" }) end, "[G]oto [D]eclaration")
