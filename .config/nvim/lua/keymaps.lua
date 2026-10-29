@@ -35,7 +35,11 @@ vim.keymap.set("n", "<leader>ws", "<cmd>split<CR>")
 vim.keymap.set("n", "qn", "<cmd>cnext<CR>")
 vim.keymap.set("n", "qp", "<cmd>cprev<CR>")
 vim.keymap.set("n", "qc", "<cmd>cclose<CR>")
-vim.keymap.set("n", "qo", "<cmd>copen<CR>")
+vim.keymap.set("n", "qo", function()
+  vim.cmd("topleft vertical copen")
+  vim.cmd("wincmd H")
+  vim.cmd("vertical resize 50")
+end, { desc = "Open quickfix on the far left", silent = true })
 
 vim.keymap.set("n", "<leader>sft", function() print(vim.bo.filetype) end)
 
