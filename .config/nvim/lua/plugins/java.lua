@@ -64,6 +64,11 @@ return {
     require("lspconfig").jdtls.setup({
       settings = {
         java = {
+          format = {
+            comments = {
+              enabled = false
+            }
+          },
           configuration = {
             runtimes = {
               {
