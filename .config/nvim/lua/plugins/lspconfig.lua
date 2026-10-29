@@ -7,6 +7,52 @@ return {
     { "deathbeam/lspecho.nvim", opts = { echo = true } },
   },
   config = function()
+    local function unique_locations(items)
+      local seen, unique = {}, {}
+
+      for _, item in ipairs(items) do
+        local filename = item.filename
+        if not filename or filename == "" then
+          filename = vim.api.nvim_buf_get_name(item.bufnr or 0)
+        end
+        filename = vim.fs.normalize(vim.fn.fnamemodify(filename, ":p"))
+
+        local key = table.concat({ filename, tostring(item.lnum), tostring(item.col) }, "\0")
+        if not seen[key] then
+          seen[key] = true
+          unique[#unique + 1] = vim.tbl_extend("force", item, { filename = filename })
+        end
+      end
+
+      return unique
+    end
+
+    local function picker_item(item)
+      local path = vim.fn.fnamemodify(item.filename, ":p:.")
+      local text = item.text or ""
+
+      return {
+        path = item.filename,
+        bufnr = item.bufnr,
+        lnum = item.lnum,
+        col = item.col,
+        text = string.format("%s│%s│%s%s", path, item.lnum or 1, item.col or 1, text == "" and "" or ("│ " .. text)),
+      }
+    end
+
+    local function pick_unique_locations(list)
+      local items = vim.tbl_map(picker_item, unique_locations(list.items))
+
+      if #items == 0 then
+        vim.notify("No locations found", vim.log.levels.INFO)
+        return
+      end
+
+      require("mini.pick").start({
+        source = { name = list.title, items = items },
+      })
+    end
+
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
       callback = function(event)
@@ -17,7 +63,7 @@ return {
         map("gd", function()
           vim.lsp.buf.definition({
             on_list = function(list)
-              local items = list.items
+              local items = unique_locations(list.items)
 
               if #items == 1 then
                 local item = items[1]
@@ -29,15 +75,7 @@ return {
               end
 
               if #items > 1 then
-                local picker_items = vim.tbl_map(function(item)
-                  return {
-                    path = item.filename,
-                    bufnr = item.bufnr,
-                    lnum = item.lnum,
-                    col = item.col,
-                    text = item.text,
-                  }
-                end, items)
+                local picker_items = vim.tbl_map(picker_item, items)
 
                 require("mini.pick").start({
                   source = { items = picker_items, name = list.title },
@@ -47,10 +85,10 @@ return {
           })
         end, "[G]oto [D]efinition")
 
-        map("gr", function() require("mini.extra").pickers.lsp({ scope = "references" }) end, "[G]oto [R]eferences")
-        map("gi", function() require("mini.extra").pickers.lsp({ scope = "implementation" }) end, "[G]oto [I]mplementation")
-        map("gD", function() require("mini.extra").pickers.lsp({ scope = "declaration" }) end, "[G]oto [D]eclaration")
-        map("gy", function() require("mini.extra").pickers.lsp({ scope = "type_definition" }) end, "Goto T[y]pe Definition")
+        map("gr", function() vim.lsp.buf.references(nil, { on_list = pick_unique_locations }) end, "[G]oto [R]eferences")
+        map("gi", function() vim.lsp.buf.implementation({ on_list = pick_unique_locations }) end, "[G]oto [I]mplementation")
+        map("gD", function() vim.lsp.buf.declaration({ on_list = pick_unique_locations }) end, "[G]oto [D]eclaration")
+        map("gy", function() vim.lsp.buf.type_definition({ on_list = pick_unique_locations }) end, "Goto T[y]pe Definition")
 
         map("K", function() vim.lsp.buf.hover({ border = "rounded" }) end, "Hover Documentation")
         map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")

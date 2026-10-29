@@ -69,8 +69,7 @@
       "model": "github-copilot/gpt-6.1-sol",
       "reasoningEffort": "medium",
       "description": "Custom agent to act as a coworker",
-      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
+      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}"
     }
   }
 }
-
