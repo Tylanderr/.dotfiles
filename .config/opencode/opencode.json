@@ -44,7 +44,7 @@
     "external_directory": {
       "*": "deny",
       "/home/tyler/projects/*": "allow",
-      "/home/tyler/.local/*": "allow",
+      "/home/tyler/.local/*": "allow"
     }
   },
 
@@ -59,15 +59,15 @@
       "disable": false,
       "permission": {
         "edit": "allow",
-        "bash": "allow",
-        "task": "allow"
+        "task": "allow",
+        "bash": "deny"
       }
     },
 
     "coworker": {
       "mode": "primary",
-      "model": "github-copilot/gpt-6-luna",
-      "reasoningEffort": "xhigh",
+      "model": "github-copilot/gpt-6.1-sol",
+      "reasoningEffort": "medium",
       "description": "Custom agent to act as a coworker",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
     }

@@ -19,6 +19,19 @@ return {
       opencode_footer = true,
     }
 
+    local mode_profiles = {
+      coworker = {
+        provider = "github-copilot",
+        model = "gpt-6.1-sol",
+        variant = "medium",
+      },
+      build = {
+        provider = "github-copilot",
+        model = "gpt-6-luna",
+        variant = "xhigh",
+      },
+    }
+
     local function async(callback)
       Promise.async(callback)()
     end
@@ -27,6 +40,22 @@ return {
       return session_runtime
         .open(vim.tbl_extend("force", { new_session = false }, options or {}))
         :await()
+    end
+
+    local function switch_mode_with_profile()
+      async(function()
+        local state = require("opencode.state")
+        local current_mode = state.store.get("current_mode")
+        local next_mode = current_mode == "coworker" and "build" or "coworker"
+
+        if not agent_model.switch_to_mode(next_mode):await() then
+          return
+        end
+
+        local profile = mode_profiles[next_mode]
+        agent_model.set_model(profile.provider, profile.model)
+        agent_model.set_variant(profile.variant)
+      end)
     end
 
     local function switch_to_coworker()
@@ -76,7 +105,6 @@ return {
         local ui = require("opencode.ui.ui")
 
         open_session({ focus = "input", start_insert = false })
-        switch_to_coworker()
 
         local observation = state.session.active_observation()
         if not observation then
@@ -117,7 +145,6 @@ return {
           focus = "output",
           start_insert = false,
         })
-        switch_to_coworker()
 
         local observation = require("opencode.state").session.active_observation()
         if not observation then
@@ -346,7 +373,7 @@ return {
           ["k"] = { function() vim.cmd("normal! gk") end, mode = "n" },
           ["<leader>ods"] = false,
           ["<M-m>"] = false,
-          ["<S-tab>"] = { "switch_mode", mode = { "n" } },
+          ["<S-tab>"] = { switch_mode_with_profile, mode = { "n" } },
           ["<C-c>"] = {
             function()
               local ok, state = pcall(require, "opencode.state")
