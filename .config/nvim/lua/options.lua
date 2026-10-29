@@ -35,12 +35,21 @@ vim.opt.smartcase = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
-vim.opt.formatoptions:remove("o")
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("NoCommentOnOpenLine", { clear = true }),
+  callback = function(event)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(event.buf) then
+	vim.bo[event.buf].formatoptions = vim.bo[event.buf].formatoptions:gsub("o", "")
+      end
+    end)
+  end,
+})
 
 vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-	callback = function()
-		vim.highlight.on_yank()
-	end,
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
 })
