@@ -8,6 +8,6 @@
     "messages_page_down": "pagedown,ctrl+d",
     "input_delete_to_line_end": "none",
     "input_delete_to_line_start": "none",
-    "input_delete_word_backward": "ctrl+backspace",
+    "input_delete_word_backward": "ctrl+backspace"
   }
 }
