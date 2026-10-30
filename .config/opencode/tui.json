@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/tui.json",
-  "theme": "custom",
+  "theme": "tokyonight",
   "keybinds": {
     "leader": "ctrl+x",
     "app_exit": "<leader>q",
