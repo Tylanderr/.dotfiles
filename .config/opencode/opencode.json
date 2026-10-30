@@ -47,7 +47,9 @@
     "external_directory": {
       "*": "deny",
       "/home/tyler/projects/*": "allow",
-      "/home/tyler/.local/*": "allow"
+      "/home/tyler/.local/*": "allow",
+      "/tmp/nvim.tyler/*": "allow",
+      "/tmp/opencode/*": "allow"
     }
   },
 
