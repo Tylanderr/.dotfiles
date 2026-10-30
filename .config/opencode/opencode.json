@@ -9,6 +9,9 @@
     "grep": "allow",
     "todowrite": "allow",
     "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "skill": "allow",
 
     "edit": "deny",
     "task": "deny",
@@ -59,8 +62,7 @@
       "disable": false,
       "permission": {
         "edit": "allow",
-        "task": "allow",
-        "bash": "deny"
+        "task": "allow"
       }
     },
 

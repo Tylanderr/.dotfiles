@@ -346,10 +346,10 @@ return {
 
       context = {
         current_file = {
-          enabled = false,
+          enabled = true,
         },
         diagnostics = {
-          enabled = false,
+          enabled = true,
         }
       },
 
