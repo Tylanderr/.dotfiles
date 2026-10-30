@@ -7,7 +7,12 @@ return {
       render_modes = { "n", "no", "i", "c", "t", "v", "V", "\22" },
       anti_conceal = {
         enabled = true,
-        disabled_modes = { "n", "c", "t" },
+        disabled_modes = { "n", "no", "c", "t", "v", "V", "\22" },
+      },
+      win_options = {
+        concealcursor = {
+          rendered = "nvc",
+        },
       },
       file_types = { "markdown", "opencode_output" },
     })
@@ -118,4 +123,3 @@ return {
     end
   end,
 }
-
