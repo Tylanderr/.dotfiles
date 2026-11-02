@@ -2,6 +2,7 @@ local neogit_open_context
 
 return {
   "NeogitOrg/neogit",
+  commit = "d93d7813cbd7acc44d2b058490c399ab84bf8d21",
   cmd = { "Neogit" },
   keys = {
     { "<leader>gs", mode = "n", desc = "Neogit status" },
@@ -19,9 +20,21 @@ return {
       end,
     })
   end,
-  commit = "d93d7813cbd7acc44d2b058490c399ab84bf8d21",
   dependencies = {
     "nvim-lua/plenary.nvim",
+    {
+      "tpope/vim-fugitive",
+      cmd = "Git",
+      keys = {
+        { "<leader>gB", "<cmd>Git blame<CR>", desc = "Git blame" },
+        { "<leader>gp", "<cmd>Git push<CR>", desc = "Git push" },
+        { "<leader>gP", "<cmd>Git push --force<CR>", desc = "Git force push" },
+        { "<leader>gu", "<cmd>Git pull --rebase<CR>", desc = "Git pull with rebase" },
+        { "<leader>ga", "<cmd>Git commit --amend --no-edit<CR>", desc = "Amend Git commit" },
+        { "<leader>gc", ":Git commit -m \"\"<Left>", desc = "Git commit" },
+        { "<leader>go", ":Git push -u origin ", desc = "Git push to origin" },
+      },
+    },
   },
   config = function()
     vim.keymap.set("n", "<leader>gs", function()
