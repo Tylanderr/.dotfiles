@@ -78,7 +78,7 @@
       "permission": {
         "edit": {
           "*": "allow",
-          "/home/tyler/.local/*": "deny"
+          "../*": "deny"
         },
         "task": "allow"
       }
