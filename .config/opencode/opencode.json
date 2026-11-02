@@ -4,7 +4,12 @@
 
   "permission": {
     "*": "ask",
-    "read": "allow",
+    "read": {
+      "*": "allow",
+      "*.env": "ask",
+      "*.env.*": "ask",
+      "*.env.example": "allow"
+    },
     "glob": "allow",
     "grep": "allow",
     "todowrite": "allow",
@@ -20,8 +25,8 @@
       "*": "ask",
 
       "ls *": "allow",
-      "mvn *": "allow",
       "rg *": "allow",
+      "rg *--pre*": "deny",
       "rm *": "deny",
       "python3 *": "deny",
       "python *": "deny",
@@ -31,17 +36,25 @@
       "node *": "deny",
       "awk *": "deny",
 
-      "git *": "allow",
-      "git commit": "deny",
-      "git commit *": "deny",
-      "git push": "deny",
-      "git push *": "deny",
-      "git reset": "deny",
-      "git reset *": "deny",
-      "git clean": "deny",
-      "git clean *": "deny",
-      "git checkout": "deny",
-      "git checkout *": "deny"
+      "git": "deny",
+      "git *": "deny",
+
+      "git status": "allow",
+      "git status *": "allow",
+      "git diff": "allow",
+      "git diff *": "allow",
+      "git log": "allow",
+      "git log *": "allow",
+      "git show": "allow",
+      "git show *": "allow",
+      "git *--output*": "deny",
+      "git *--ext-diff*": "deny",
+      "git *--textconv*": "deny",
+
+      "mvn test": "allow",
+      "mvn test *": "allow",
+      "npm test": "allow",
+      "npm test *": "allow"
     },
 
     "external_directory": {
@@ -63,7 +76,10 @@
     "build": {
       "disable": false,
       "permission": {
-        "edit": "allow",
+        "edit": {
+          "*": "allow",
+          "/home/tyler/.local/*": "deny"
+        },
         "task": "allow"
       }
     },
@@ -73,7 +89,34 @@
       "model": "github-copilot/gpt-6.1-sol",
       "reasoningEffort": "medium",
       "description": "Custom agent to act as a coworker",
-      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}"
+      "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
+      "permission": {
+        "bash": {
+          "*": "deny",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "rg *": "allow",
+          "rg *--pre*": "deny",
+          "git status": "allow",
+          "git status *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git log": "allow",
+          "git log *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "git branch --show-current": "allow",
+          "git remote -v": "allow",
+          "git tag --list": "allow",
+          "git *--output*": "deny",
+          "git *--ext-diff*": "deny",
+          "git *--textconv*": "deny",
+          "file *": "allow",
+          "stat *": "allow",
+          "wc *": "allow"
+        }
+      }
     }
   }
 }
