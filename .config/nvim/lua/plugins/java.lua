@@ -6,7 +6,8 @@ return {
     -- Temporary to suppress a deprecation message
     local original_deprecate = vim.deprecate
     vim.deprecate = function(name, alternative, version, plugin, backtrace)
-      if name == "The `require(\"lspconfig\")` \"framework\"" and plugin == "nvim-lspconfig" then
+      if name == [[The `require('lspconfig')` "framework"]]
+        and plugin == "nvim-lspconfig" then
         return
       end
 
@@ -41,7 +42,7 @@ return {
     vim.lsp.handlers["workspace/executeClientCommand"] = function(_, params, ctx)
       local client = vim.lsp.get_client_by_id(ctx.client_id) or {}
       local command = (client.commands or {})[params.command]
-        or vim.lsp.commands[params.command]
+      or vim.lsp.commands[params.command]
 
       if not command then
         return vim.lsp.rpc_response_error(
