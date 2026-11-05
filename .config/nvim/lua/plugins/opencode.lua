@@ -410,9 +410,17 @@ return {
       },
     })
 
-    -- Open OpenCode panels when the plugin loads, while keeping editor focus.
+    local notes_dir = vim.fs.normalize("/home/tyler/vault/obsidian-developer-vault")
+
+    -- Open OpenCode panels at startup, except in the notes vault.
     vim.schedule(function()
       if #api.nvim_list_uis() == 0 then
+        return
+      end
+
+      local cwd = vim.fs.normalize(fn.getcwd())
+      local in_notes = cwd == notes_dir or cwd:sub(1, #notes_dir + 1) == notes_dir .. "/"
+      if in_notes then
         return
       end
 

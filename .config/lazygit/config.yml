@@ -33,8 +33,9 @@ keybinding:
     quit: q
     quit-alt1: <disabled>
     return: <c-c>
+    edit: E
 customCommands:
-  - key: 'E'
+  - key: 'e'
     context: 'files'
     description: 'Edit in parent Neovim'
     command: >-

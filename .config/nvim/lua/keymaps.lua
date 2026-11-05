@@ -22,8 +22,6 @@ vim.keymap.set("n", "q", "<nop>")
 vim.keymap.set("n", "<M-m>", "<nop>")
 vim.keymap.set("n", "<c-q>", "<nop>")
 vim.keymap.set("n", "<c-f>", "<nop>")
-vim.keymap.set("n", "<leader>qu", "<cmd>q<CR>")
-vim.keymap.set("n", "<leader>QU", "<cmd>qa!<CR>")
 
 vim.keymap.set("v", "<leader>s", [[y:%s/\<<C-r>0\>/<C-r>0/gI<Left><Left><Left>]])
 vim.keymap.set({ "n", "v" }, "<leader>=", "mzgg=G`zzz", { noremap = true, silent = true })
@@ -31,6 +29,10 @@ vim.keymap.set({ "n", "v" }, "<leader>=", "mzgg=G`zzz", { noremap = true, silent
 vim.keymap.set("n", "<leader>nh", "<cmd>noh<CR>")
 vim.keymap.set("n", "<leader>wv", "<cmd>vsplit<CR>")
 vim.keymap.set("n", "<leader>ws", "<cmd>split<CR>")
+
+vim.keymap.set("n", "<leader>sft", function() print(vim.bo.filetype) end)
+
+vim.keymap.set("n", "<leader>i", "1<C-w>w")
 
 vim.keymap.set("n", "qn", "<cmd>cnext<CR>")
 vim.keymap.set("n", "qp", "<cmd>cprev<CR>")
@@ -41,9 +43,37 @@ vim.keymap.set("n", "qo", function()
   vim.cmd("vertical resize 50")
 end, { desc = "Open quickfix on the far left", silent = true })
 
-vim.keymap.set("n", "<leader>sft", function() print(vim.bo.filetype) end)
+vim.keymap.set("n", "<leader>qu", function()
+  local api = vim.api
+  local current_win = api.nvim_get_current_win()
+  local opencode_filetypes = {
+    opencode = true,
+    opencode_output = true,
+    opencode_footer = true,
+    opencode_session_tabs = true,
+  }
+  local has_other_editor_window = false
 
-vim.keymap.set("n", "<leader>i", "1<C-w>w")
+  for _, win in ipairs(api.nvim_list_wins()) do
+    local config = api.nvim_win_get_config(win)
+    local is_regular_window = config.relative == "" and not config.external
+
+    if win ~= current_win and is_regular_window then
+      local buf = api.nvim_win_get_buf(win)
+      if not opencode_filetypes[vim.bo[buf].filetype] then
+        has_other_editor_window = true
+        break
+      end
+    end
+  end
+
+  if has_other_editor_window then
+    vim.cmd("quit")
+  else
+    vim.cmd("quitall")
+  end
+end, { desc = "Quit pane; exit if only OpenCode would remain" })
+vim.keymap.set("n", "<leader>QU", "<cmd>qa!<CR>")
 
 vim.keymap.set("n", "<leader>tl", "<cmd>tabnext<CR>")
 vim.keymap.set("n", "<leader>th", "<cmd>tabprev<CR>")
