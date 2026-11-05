@@ -1,6 +1,5 @@
 return {
   "sudo-tee/opencode.nvim",
-  event = "VeryLazy",
   commit = "494e474f58c45218a4cf7c7d2e76b0408de09daa",
   dependencies = {
     "nvim-lua/plenary.nvim",
@@ -248,7 +247,7 @@ return {
     end
 
     local function reset_window_width()
-      local default_width = math.floor(vim.o.columns * 0.33)
+      local default_width = math.floor(vim.o.columns * 0.35)
 
       for _, win in ipairs(api.nvim_list_wins()) do
         local buf = api.nvim_win_get_buf(win)
@@ -392,7 +391,8 @@ return {
       },
 
       ui = {
-        window_width = 0.33,
+        restore_tabs_on_startup = false,
+        window_width = 0.35,
         zoom_width = 0.8,
         picker_width = false,
 
@@ -409,6 +409,29 @@ return {
         }
       },
     })
+
+    -- Open OpenCode panels when the plugin loads, while keeping editor focus.
+    vim.schedule(function()
+      if #api.nvim_list_uis() == 0 then
+        return
+      end
+
+      local editor_win = api.nvim_get_current_win()
+      Promise.async(function()
+        open_session({
+          new_session = false,
+          start_insert = false,
+        })
+      end)()
+        :catch(function(err)
+          vim.notify("OpenCode startup: " .. tostring(err), vim.log.levels.ERROR)
+        end)
+        :finally(function()
+          if api.nvim_win_is_valid(editor_win) then
+            api.nvim_set_current_win(editor_win)
+          end
+        end)
+    end)
 
     vim.keymap.set("n", "<leader>ow", reset_window_width, {
       desc = "Reset opencode window size",
