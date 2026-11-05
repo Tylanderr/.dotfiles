@@ -36,8 +36,8 @@
       "node *": "deny",
       "awk *": "deny",
 
-      "git": "deny",
-      "git *": "deny",
+      "git": "ask",
+      "git *": "ask",
 
       "git status": "allow",
       "git status *": "allow",
@@ -47,9 +47,6 @@
       "git log *": "allow",
       "git show": "allow",
       "git show *": "allow",
-      "git *--output*": "deny",
-      "git *--ext-diff*": "deny",
-      "git *--textconv*": "deny",
 
       "mvn test": "allow",
       "mvn test *": "allow",
