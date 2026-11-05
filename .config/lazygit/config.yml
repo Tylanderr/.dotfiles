@@ -1,5 +1,4 @@
 gui:
-  screenMode: half
   showFileTree: false
   nerdFontsVersion: "3"
   theme:
