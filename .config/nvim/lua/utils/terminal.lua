@@ -3,9 +3,29 @@ local left_term_win = nil
 local left_previous_buf = nil
 
 local function setup_term_keymaps(buf)
+  local last_ctrl_c = nil
+
   vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", {
     buffer = buf,
     nowait = true,
+  })
+
+  vim.keymap.set("t", "<C-c>", function()
+    local now = vim.uv.hrtime()
+    local double_press = last_ctrl_c and now - last_ctrl_c <= 400 * 1e6
+
+    if double_press then
+      last_ctrl_c = nil
+      return "<C-\\><C-n>"
+    end
+
+    last_ctrl_c = now
+    return "<C-c>"
+  end, {
+    buffer = buf,
+    expr = true,
+    nowait = true,
+    desc = "Interrupt; press twice for terminal-normal mode",
   })
 
   vim.keymap.set("n", "i", "i", { buffer = buf })
