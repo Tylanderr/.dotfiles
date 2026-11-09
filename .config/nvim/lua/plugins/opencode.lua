@@ -62,7 +62,7 @@ return {
     end
 
     local function toggle_panel()
-      local restore_to_previous_window_flag = true
+      local restore_to_previous_window_flag = false
       if restore_to_previous_window_flag then
         local previous_win = api.nvim_get_current_win()
         return require("opencode.api").toggle():finally(function()
@@ -214,13 +214,9 @@ return {
       end
 
       local row, col = unpack(api.nvim_win_get_cursor(win))
-      local line = api.nvim_buf_get_lines(buf, row - 1, row, false)[1] or ""
 
-      -- Split the current line at the cursor.
-      api.nvim_buf_set_lines(buf, row - 1, row, false, {
-        line:sub(1, col),
-        line:sub(col + 1),
-      })
+      -- Add the image mention on a new line without splitting existing text.
+      api.nvim_buf_set_lines(buf, row, row, false, { "@" })
       api.nvim_win_set_cursor(win, { row + 1, 0 })
 
       -- Match the current plugin's paste workflow: insert a mention
@@ -240,12 +236,10 @@ return {
           return
         end
 
-        local image_row = row + 1
-
-        -- Insert a new line after the image mention.
-        api.nvim_buf_set_lines(buf, image_row, image_row, false, { "" })
+        -- Leave an empty line after the image mention for continued typing.
+        api.nvim_buf_set_lines(buf, row + 1, row + 1, false, { "" })
         api.nvim_set_current_win(win)
-        api.nvim_win_set_cursor(win, { image_row + 1, 0 })
+        api.nvim_win_set_cursor(win, { row + 2, 0 })
 
         vim.cmd("stopinsert")
       end)
