@@ -37,8 +37,8 @@ return {
 
     local function open_session(options)
       return session_runtime
-        .open(vim.tbl_extend("force", { new_session = false }, options or {}))
-        :await()
+          .open(vim.tbl_extend("force", { new_session = false }, options or {}))
+          :await()
     end
 
     local function switch_mode_with_profile()
@@ -62,12 +62,17 @@ return {
     end
 
     local function toggle_panel()
-      local previous_win = api.nvim_get_current_win()
-      return require("opencode.api").toggle():finally(function()
-        if api.nvim_win_is_valid(previous_win) then
-          api.nvim_set_current_win(previous_win)
-        end
-      end)
+      local restore_to_previous_window_flag = true
+      if restore_to_previous_window_flag then
+        local previous_win = api.nvim_get_current_win()
+        return require("opencode.api").toggle():finally(function()
+          if api.nvim_win_is_valid(previous_win) then
+            api.nvim_set_current_win(previous_win)
+          end
+        end)
+      else
+        return require("opencode.api").toggle()
+      end
     end
 
     local function add_current_text_as_context()
@@ -425,10 +430,10 @@ return {
       end
 
       require("opencode.server_job")
-        .ensure_server()
-        :catch(function(err)
-          vim.notify("OpenCode server startup: " .. tostring(err), vim.log.levels.ERROR)
-        end)
+          .ensure_server()
+          :catch(function(err)
+            vim.notify("OpenCode server startup: " .. tostring(err), vim.log.levels.ERROR)
+          end)
     end)
 
     vim.keymap.set("n", "<leader>ow", reset_window_width, {
