@@ -412,7 +412,7 @@ return {
 
     local notes_dir = vim.fs.normalize("/home/tyler/vault/obsidian-developer-vault")
 
-    -- Open OpenCode panels at startup, except in the notes vault.
+    -- Warm up the OpenCode server without opening panels.
     vim.schedule(function()
       if #api.nvim_list_uis() == 0 then
         return
@@ -424,20 +424,10 @@ return {
         return
       end
 
-      local editor_win = api.nvim_get_current_win()
-      Promise.async(function()
-        open_session({
-          new_session = false,
-          start_insert = false,
-        })
-      end)()
+      require("opencode.server_job")
+        .ensure_server()
         :catch(function(err)
-          vim.notify("OpenCode startup: " .. tostring(err), vim.log.levels.ERROR)
-        end)
-        :finally(function()
-          if api.nvim_win_is_valid(editor_win) then
-            api.nvim_set_current_win(editor_win)
-          end
+          vim.notify("OpenCode server startup: " .. tostring(err), vim.log.levels.ERROR)
         end)
     end)
 
