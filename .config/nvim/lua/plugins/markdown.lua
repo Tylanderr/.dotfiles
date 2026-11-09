@@ -9,11 +9,6 @@ return {
         enabled = true,
         disabled_modes = { "n", "no", "c", "t", "v", "V", "\22" },
       },
-      win_options = {
-        concealcursor = {
-          rendered = "nvc",
-        },
-      },
       file_types = { "markdown", "opencode_output" },
     })
 
@@ -85,7 +80,7 @@ return {
         return
       end
 
-      local desired = ft == "opencode_output" or markdown_render_enabled
+      local desired = markdown_render_enabled
       local current = require("render-markdown.state").get(buf).enabled
       if current ~= desired then
         require("render-markdown.core.manager").set_buf(buf, desired)
@@ -103,7 +98,7 @@ return {
       end
 
       local state = markdown_render_enabled and "enabled" or "disabled"
-      vim.notify("Markdown rendering " .. state .. " (opencode_output unchanged)", vim.log.levels.INFO)
+      vim.notify("Markdown rendering " .. state, vim.log.levels.INFO)
     end, { desc = "Toggle markdown rendering" })
 
     local markdown_render_group = vim.api.nvim_create_augroup("OpencodeMarkdownRender", { clear = true })
