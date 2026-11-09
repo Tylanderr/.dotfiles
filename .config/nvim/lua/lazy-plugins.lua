@@ -11,9 +11,7 @@ require("lazy").setup({
     { import = "plugins.lazygit" },
     { import = "plugins.lspconfig" },
     { import = "plugins.lualine" },
-    { import = "plugins.markdown" },
     { import = "plugins.mini" },
-    -- { import = "plugins.neogit" },
     { import = "plugins.noice" },
     { import = "plugins.obsidian" },
     { import = "plugins.oil" },
@@ -25,6 +23,10 @@ require("lazy").setup({
     { import = "plugins.treesitter" },
     { import = "plugins.trouble" },
     { import = "plugins.vimsleuth" },
+
+    -- Frequently disabled
+    -- { import = "plugins.markdown" },
+    -- { import = "plugins.neogit" },
   },
   ui = {
     border = "rounded"
