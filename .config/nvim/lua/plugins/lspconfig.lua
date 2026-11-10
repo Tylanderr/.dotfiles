@@ -108,8 +108,8 @@ return {
         map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
         map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
         map("<leader>vd", function() vim.diagnostic.open_float() end, "Open diagnostics float")
-        map("<leader>li", "<cmd>LspInfo<CR>", "Open LspInfo")
-        map("<leader>lr", "<cmd>LspRestart<CR>", "Restart LSP")
+        map("<leader>li", "<cmd>checkhealth vim.lsp<CR>", "Open LSP health")
+        map("<leader>lr", "<cmd>lsp restart<CR>", "Restart LSP")
       end,
     })
 
