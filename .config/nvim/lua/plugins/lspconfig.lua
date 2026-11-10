@@ -7,6 +7,11 @@ return {
     { "deathbeam/lspecho.nvim", opts = { echo = true } },
   },
   config = function()
+    local function is_virtual_uri(filename)
+      local scheme = filename:match("^([%a][%w+.-]*):")
+      return scheme ~= nil and scheme ~= "file" and not filename:match("^%a:[/\\]")
+    end
+
     local function unique_locations(items)
       local seen, unique = {}, {}
 
@@ -15,7 +20,12 @@ return {
         if not filename or filename == "" then
           filename = vim.api.nvim_buf_get_name(item.bufnr or 0)
         end
-        filename = vim.fs.normalize(vim.fn.fnamemodify(filename, ":p"))
+        if filename:match("^file:") then
+          filename = vim.uri_to_fname(filename)
+        end
+        if not is_virtual_uri(filename) then
+          filename = vim.fs.normalize(vim.fn.fnamemodify(filename, ":p"))
+        end
 
         local key = table.concat({ filename, tostring(item.lnum), tostring(item.col) }, "\0")
         if not seen[key] then
@@ -28,7 +38,10 @@ return {
     end
 
     local function picker_item(item)
-      local path = vim.fn.fnamemodify(item.filename, ":p:.")
+      local path = item.filename
+      if not is_virtual_uri(path) then
+        path = vim.fn.fnamemodify(path, ":p:.")
+      end
       local text = item.text or ""
 
       return {
@@ -69,6 +82,7 @@ return {
                 local item = items[1]
                 local bufnr = item.bufnr or vim.fn.bufadd(item.filename)
 
+                vim.fn.bufload(bufnr)
                 vim.api.nvim_win_set_buf(0, bufnr)
                 vim.api.nvim_win_set_cursor(0, { item.lnum, item.col - 1 })
                 return
