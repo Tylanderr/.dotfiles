@@ -28,8 +28,6 @@
       "rg *": "allow",
       "rg *--pre*": "deny",
       "rm *": "deny",
-      "python3 *": "deny",
-      "python *": "deny",
       "perl *": "deny",
       "sed *": "deny",
       "ruby *": "deny",
