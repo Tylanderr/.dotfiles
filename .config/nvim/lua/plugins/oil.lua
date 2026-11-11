@@ -50,7 +50,7 @@ return {
         end
       }
     })
-    vim.keymap.set("n", "-", function()
+    local function open_oil(as_float)
       local ok, ui = pcall(require, "opencode.ui.ui")
       local current_win = vim.api.nvim_get_current_win()
 
@@ -73,8 +73,20 @@ return {
         end
       end
 
-      -- require("oil").open_float()
-      require("oil").open()
+      local oil = require("oil")
+      if as_float then
+        oil.open_float()
+      else
+        oil.open()
+      end
+    end
+
+    vim.keymap.set("n", "-", function()
+      open_oil(true)
+    end, { desc = "Open Oil (float)" })
+
+    vim.keymap.set("n", "<leader>-", function()
+      open_oil(false)
     end, { desc = "Open Oil" })
   end,
 }
