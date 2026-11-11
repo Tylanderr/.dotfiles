@@ -911,6 +911,7 @@ local function create_review(tabpage, win, opts)
     open_panel(review)
   end
   show_message(review, { "Loading changes…" })
+  api.nvim_set_current_win(win)
   refresh(review)
 end
 
