@@ -23,6 +23,7 @@ return {
   keys = {
     { "<c-u>", function() require("diffview.actions").scroll_view(-0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view up", },
     { "<c-d>", function() require("diffview.actions").scroll_view(0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view down", },
+    { "<leader>gdu", function() require("utils.changes").toggle() end, desc = "Toggle left-pane unified diff against HEAD", },
 
     { "<leader>gdm", function()
         local lib = require("diffview.lib")
@@ -41,6 +42,10 @@ return {
       desc = "DiffviewOpen",
     },
     { "<leader>gdo", function()
+        if require("utils.changes").open_current_file() then
+          return
+        end
+
         local lib = require("diffview.lib")
         local view = lib.get_current_view()
         if not view then
