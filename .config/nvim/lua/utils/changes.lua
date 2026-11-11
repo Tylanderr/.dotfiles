@@ -978,6 +978,15 @@ function M.open_current_file()
   return true
 end
 
+function M.current_file_path()
+  local review = reviews[api.nvim_get_current_tabpage()]
+  local file = review and review.files[review.index or 0]
+  if not (review and file and review.root and is_current_review(review)) then
+    return nil
+  end
+  return review.root .. "/" .. file.path
+end
+
 function M.toggle()
   local tabpage = api.nvim_get_current_tabpage()
   local review = reviews[tabpage]

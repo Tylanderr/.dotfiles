@@ -61,6 +61,77 @@ return {
       agent_model.switch_to_mode("coworker"):await()
     end
 
+    local function add_visual_selection_inline()
+      local buf = api.nvim_get_current_buf()
+      local mode = fn.mode(1)
+      if not mode:match("^[vV\22]") then
+        return
+      end
+
+      local start_pos = fn.getpos("v")
+      local end_pos = fn.getpos(".")
+      local first_pos, last_pos = start_pos, end_pos
+      if first_pos[2] > last_pos[2]
+        or (first_pos[2] == last_pos[2] and first_pos[3] > last_pos[3])
+      then
+        first_pos, last_pos = last_pos, first_pos
+      end
+
+      local lines = api.nvim_buf_get_lines(buf, first_pos[2] - 1, last_pos[2], false)
+      if mode == "v" then
+        local first_col = math.min(start_pos[3], end_pos[3]) - 1
+        local last_col = math.max(start_pos[3], end_pos[3])
+        if first_pos[2] == last_pos[2] then
+          lines[1] = (lines[1] or ""):sub(first_col + 1, last_col)
+        else
+          lines[1] = (lines[1] or ""):sub(first_pos[3])
+          lines[#lines] = (lines[#lines] or ""):sub(1, last_pos[3])
+        end
+      elseif mode == "\22" then
+        local first_col = math.min(start_pos[3], end_pos[3]) - 1
+        local last_col = math.max(start_pos[3], end_pos[3])
+        for i, line in ipairs(lines) do
+          lines[i] = line:sub(first_col + 1, last_col)
+        end
+      end
+
+      local text = table.concat(lines, "\n")
+      if text:match("^%s*$") then
+        vim.notify("No visual selection found", vim.log.levels.WARN)
+        return
+      end
+
+      local path
+      local ok, changes = pcall(require, "utils.changes")
+      if ok then
+        path = changes.current_file_path()
+      end
+      if not path then
+        local name = api.nvim_buf_get_name(buf)
+        if name ~= "" and fn.filereadable(name) == 1 then
+          path = name
+        end
+      end
+
+      local filetype = path and vim.filetype.match({ filename = path }) or vim.bo[buf].filetype
+      local fence_length = 3
+      for run in text:gmatch("`+") do
+        fence_length = math.max(fence_length, #run + 1)
+      end
+      local fence = string.rep("`", fence_length)
+      local block = string.format("%s%s\n%s\n%s", fence, filetype or "", text, fence)
+      if path then
+        block = string.format("**`%s`**\n\n%s", path, block)
+      end
+
+      api.nvim_feedkeys(api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", true)
+      async(function()
+        open_session({ focus = "input", start_insert = false })
+        require("opencode.ui.input_window")._append_to_input(block)
+        vim.cmd("stopinsert")
+      end)
+    end
+
     local function toggle_panel()
       local restore_to_previous_window_flag = false
       if restore_to_previous_window_flag then
@@ -345,9 +416,11 @@ return {
       context = {
         current_file = {
           enabled = true,
+          enabled = false,
         },
         diagnostics = {
           enabled = true,
+          enabled = false,
         }
       },
 
@@ -357,6 +430,7 @@ return {
           ["<leader>/"] = { "quick_chat", mode = { "n", "x" } },
           ["<leader>ot"] = { "configure_variant" },
           ["<leader>av"] = { add_current_text_as_context, mode = { "n", "v" }, desc = "Add selection as OpenCode context", },
+          ["<leader>av"] = { add_visual_selection_inline, mode = { "v" }, desc = "Insert selection into OpenCode input", },
           ["<leader>af"] = { add_current_file, mode = { "n" } },
           ["<leader>oi"] = { open_input, mode = { "n" } },
           ["<leader>oo"] = { open_output, mode = { "n" }, desc = "Open and refresh OpenCode output", },

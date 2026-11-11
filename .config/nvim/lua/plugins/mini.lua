@@ -136,6 +136,24 @@ return {
         },
       })
 
+      local pick = require("mini.pick")
+      pick.builtin.files = function(_, opts)
+        opts = vim.tbl_deep_extend("force", {
+          source = { name = "Files (including hidden)" },
+        }, opts or {})
+
+        return pick.builtin.cli({
+          command = {
+            "rg",
+            "--files",
+            "--hidden",
+            "--color=never",
+            "--glob",
+            "!.git",
+          },
+        }, opts)
+      end
+
       local map = vim.keymap.set
       map("n", "<leader>fd", function() require("mini.extra").pickers.diagnostic({ scope = "current" }) end, { desc = "Document diagnostics" })
       map("n", "<leader>fh", function() require("mini.pick").builtin.help() end, { desc = "Help pages" })
