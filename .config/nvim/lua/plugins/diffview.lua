@@ -17,7 +17,17 @@ return {
       win_config = {
         width = 50,
       }
+    },
+    hooks = {
+      view_opened = function(view)
+        vim.schedule(function()
+          if view:is_cur_tabpage() and view.cur_layout then
+            view.cur_layout:get_main_win():focus()
+          end
+        end)
+      end,
     }
+    },
   },
 
   keys = {
