@@ -23,9 +23,8 @@ require("lazy").setup({
     -- Secondary plugins
     { import = "plugins.indent" },
     { import = "plugins.java" },
-    { import = "plugins.lazygit" },
     { import = "plugins.markdown" },
-    -- { import = "plugins.neogit" },
+    { import = "plugins.neogit" },
     { import = "plugins.obsidian" },
     { import = "plugins.todo-comments" },
   },
