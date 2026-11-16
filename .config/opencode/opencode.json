@@ -79,9 +79,6 @@
       "description": "Read-only engineering advisor for code investigation, explanations, trade-off analysis, and implementation planning",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
       "permission": {
-        "external_directory": {
-          "*": "ask"
-        },
         "bash": {
           "*": "deny",
           "pwd": "allow",
