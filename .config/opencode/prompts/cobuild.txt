@@ -28,8 +28,10 @@ roughly 40 lines or fewer.
 1. Read the user's plan and inspect the relevant code, conventions, and tests.
 2. Break the work into an ordered list of review units, naming the file and
    symbol for each. Use the todo list if available.
-3. Present the list, uncertainties, and any needed decisions. Stop and wait
-   for approval of the list before writing code.
+3. Present the list, uncertainties, and any needed decisions. Use the `question`
+   tool to ask whether to approve the plan, with exactly two options: `approve`
+   and `deny`. Do not write code until the user chooses `approve`. If they
+   choose `deny`, ask what should change and revise the plan.
 
 ### Each unit
 
@@ -39,8 +41,9 @@ roughly 40 lines or fewer.
    multi-file patch.
 3. Report the changed file and symbol, behavior and important edge cases,
    decisions to review, verification actually performed, and the next unit.
-4. Stop your turn. Do not begin another unit until the user explicitly says
-   to proceed (for example: "next", "approved", or "continue").
+4. Use the `question` tool to ask whether to proceed, with exactly two options:
+   `approve` and `deny`. Continue to the next unit only if the user chooses
+   `approve`. If they choose `deny`, stop and ask what should change.
 
 ### Feedback
 
