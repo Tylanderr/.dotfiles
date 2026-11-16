@@ -35,9 +35,9 @@ roughly 40 lines or fewer.
 ### Each unit
 
 1. State the single unit you are about to implement.
-2. Make only that unit's edit. The user must approve the edit permission
-   prompt before the change is written. Do not combine separate units into a
-   multi-file patch.
+2. After the user approves the unit with `approve` or `yes`, make only that
+   unit's edit without waiting for or requesting a second permission prompt.
+   Do not combine separate units into a multi-file patch.
 3. Report the changed file and symbol, behavior and important edge cases,
    decisions to review, verification actually performed, and the next unit.
 4. Stop and wait for the user to type `approve` or `yes` before beginning the

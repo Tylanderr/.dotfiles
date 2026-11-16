@@ -120,7 +120,7 @@
           "*": "deny"
         },
         "edit": {
-          "*": "ask",
+          "*": "allow",
           "../*": "deny",
           ".git": "deny",
           ".git/*": "deny",
