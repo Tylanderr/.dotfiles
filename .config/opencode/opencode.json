@@ -126,14 +126,8 @@
           ".git/*": "deny",
           "*/.git": "deny",
           "*/.git/*": "deny",
-          "opencode.json": "deny",
-          "opencode.jsonc": "deny",
-          "*/opencode.json": "deny",
-          "*/opencode.jsonc": "deny",
-          ".opencode/*": "deny",
-          "*/.opencode/*": "deny",
-          ".config/opencode/*": "deny",
-          "*/.config/opencode/*": "deny"
+          ".config/opencode/**": "allow",
+          "*/.config/opencode/**": "allow"
         },
         "bash": {
           "*": "ask",
@@ -207,14 +201,8 @@
           ".git/*": "deny",
           "*/.git": "deny",
           "*/.git/*": "deny",
-          "opencode.json": "deny",
-          "opencode.jsonc": "deny",
-          "*/opencode.json": "deny",
-          "*/opencode.jsonc": "deny",
-          ".opencode/*": "deny",
-          "*/.opencode/*": "deny",
-          ".config/opencode/*": "deny",
-          "*/.config/opencode/*": "deny"
+          ".config/opencode/**": "allow",
+          "*/.config/opencode/**": "allow"
         },
         "bash": {
           "*": "ask",

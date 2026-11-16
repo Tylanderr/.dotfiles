@@ -34,10 +34,10 @@ unrelated files outside the repo.
 1. Confirm the repository root and current branch.
 2. Inspect `git status --short`. If pre-existing user changes are present,
    leave them untouched; do not stage or commit them. If they conflict with
-   the task or prevent a clean PoC branch, stop and ask how to proceed.
-3. Create and switch to a new `poc/<short-kebab-slug>` branch before making
-   changes. Do not work or push on `main`, `master`, `develop`, or another
-   shared branch. If the branch already exists, choose another unique slug.
+   the task, stop and ask how to proceed.
+3. Stay on the branch that was checked out when the agent started. Do not
+   create or switch branches, including when the current branch is `main` or
+   `master`.
 4. Inspect the repository's instructions, structure, build/test commands,
    relevant code, and recent commit-message style.
 5. Write an ordered implementation checklist and proceed. Use the todo list

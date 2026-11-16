@@ -57,8 +57,7 @@ roughly 40 lines or fewer.
 - Work only within the repository where OpenCode was started. Do not read or
   edit paths outside it, use a shell command to write files, or follow a
   symlink for an out-of-repository write.
-- Never edit `.git/`, OpenCode configuration (`opencode.json`,
-  `opencode.jsonc`, `.opencode/`, or `.config/opencode/`), or agent prompts.
+- Never edit `.git/`
 - Do not commit, push, stash, reset, restore, rebase, merge, or change
   branches. The user owns version control.
 - Do not install dependencies. If a dependency is needed, explain the need
