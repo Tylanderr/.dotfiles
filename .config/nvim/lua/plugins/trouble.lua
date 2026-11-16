@@ -8,7 +8,5 @@ return {
     { "tn", function() require("trouble").next({ skip_groups = true, jump = true }) end, desc = "Next Trouble item" },
     { "tp", function() require("trouble").prev({ skip_groups = true, jump = true }) end, desc = "Previous Trouble item" },
   },
-  config = function()
-    require("trouble").setup({})
-  end
+  opts = {},
 }

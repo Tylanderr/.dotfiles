@@ -24,6 +24,18 @@ function M.textfunc(info)
   return lines
 end
 
+function M.set(items, title)
+  local list = {
+    items = items,
+    quickfixtextfunc = "v:lua.QuickfixFilenameText",
+  }
+  if title then
+    list.title = title
+    list.nr = "$"
+  end
+  vim.fn.setqflist({}, " ", list)
+end
+
 _G.QuickfixFilenameText = M.textfunc
 
 return M

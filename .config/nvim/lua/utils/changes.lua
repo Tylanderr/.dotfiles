@@ -78,27 +78,12 @@ local function notify_error(message)
   vim.notify(message, vim.log.levels.WARN)
 end
 
-local function is_opencode_window(win)
-  local ok, ui = pcall(require, "opencode.ui.ui")
-  return ok and ui.is_opencode_window(win)
-end
-
 local function leftmost_non_opencode_window(tabpage)
-  local target, target_position
-  for _, win in ipairs(api.nvim_tabpage_list_wins(tabpage)) do
-    local buf = api.nvim_win_get_buf(win)
-    local is_panel = vim.bo[buf].filetype == "AgentChangesFiles"
-    if api.nvim_win_get_config(win).relative == "" and not is_panel and not is_opencode_window(win) then
-      local position = api.nvim_win_get_position(win)
-      if not target_position
-        or position[2] < target_position[2]
-        or (position[2] == target_position[2] and position[1] < target_position[1])
-      then
-        target, target_position = win, position
-      end
-    end
-  end
-  return target
+  return require("utils.windows").leftmost_window(tabpage, {
+    exclude = function(win)
+      return vim.bo[api.nvim_win_get_buf(win)].filetype == "AgentChangesFiles"
+    end,
+  })
 end
 
 local function is_current_review(review)
@@ -195,8 +180,7 @@ end
 local function build_entries(files)
   local root = { dirs = {}, files = {} }
   for _, file in ipairs(files) do
-    local node
-    node = root
+    local node = root
     local parts = vim.split(file.path, "/", { plain = true })
     for i = 1, #parts - 1 do
       node.dirs[parts[i]] = node.dirs[parts[i]] or { name = parts[i], dirs = {}, files = {} }
@@ -453,18 +437,13 @@ local function render_diff(review, model, file, preserve_cursor)
     end
     if info.kind == "change_new" and info.pair then
       local old_ranges, new_ranges = inline_ranges(model.lines[info.pair], model.lines[row])
-      for _, range in ipairs(old_ranges) do
-        if range[2] > range[1] then
-          api.nvim_buf_set_extmark(buf, namespaces.diff, info.pair - 1, range[1], {
-            end_col = range[2], hl_group = "AgentChangesText", priority = 200,
-          })
-        end
-      end
-      for _, range in ipairs(new_ranges) do
-        if range[2] > range[1] then
-          api.nvim_buf_set_extmark(buf, namespaces.diff, row - 1, range[1], {
-            end_col = range[2], hl_group = "AgentChangesText", priority = 200,
-          })
+      for _, target in ipairs({ { row = info.pair - 1, ranges = old_ranges }, { row = row - 1, ranges = new_ranges } }) do
+        for _, range in ipairs(target.ranges) do
+          if range[2] > range[1] then
+            api.nvim_buf_set_extmark(buf, namespaces.diff, target.row, range[1], {
+              end_col = range[2], hl_group = "AgentChangesText", priority = 200,
+            })
+          end
         end
       end
     end
@@ -936,6 +915,14 @@ function M.statuscolumn()
   return ("%%C%%#LineNr#%s %s %%#%s#%s%%* "):format(number(info.old), number(info.new), group, sign)
 end
 
+local function current_review_file()
+  local review = reviews[api.nvim_get_current_tabpage()]
+  local file = review and review.files[review.index or 0]
+  if review and file and review.root and is_current_review(review) then
+    return review, file
+  end
+end
+
 function M.open_current_file()
   local current_buf = api.nvim_get_current_buf()
   local filetype = vim.bo[current_buf].filetype
@@ -943,9 +930,8 @@ function M.open_current_file()
     return false
   end
 
-  local review = reviews[api.nvim_get_current_tabpage()]
-  local file = review and review.files[review.index or 0]
-  if not (review and file and review.root and is_current_review(review)) then
+  local review, file = current_review_file()
+  if not review then
     notify_error("No changed file selected")
     return true
   end
@@ -961,16 +947,7 @@ function M.open_current_file()
   close_review(review)
   vim.cmd("1tabnext")
 
-  local target, target_position
-  for _, win in ipairs(api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())) do
-    local position = api.nvim_win_get_position(win)
-    if not target_position
-      or position[2] < target_position[2]
-      or (position[2] == target_position[2] and position[1] < target_position[1])
-    then
-      target, target_position = win, position
-    end
-  end
+  local target = require("utils.windows").leftmost_window(0, { include_opencode = true })
   if target then
     api.nvim_set_current_win(target)
   end
@@ -979,9 +956,8 @@ function M.open_current_file()
 end
 
 function M.current_file_path()
-  local review = reviews[api.nvim_get_current_tabpage()]
-  local file = review and review.files[review.index or 0]
-  if not (review and file and review.root and is_current_review(review)) then
+  local review, file = current_review_file()
+  if not review then
     return nil
   end
   return review.root .. "/" .. file.path

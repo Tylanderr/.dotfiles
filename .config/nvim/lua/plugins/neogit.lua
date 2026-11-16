@@ -5,10 +5,10 @@ return {
   commit = "d93d7813cbd7acc44d2b058490c399ab84bf8d21",
   cmd = { "Neogit" },
   keys = {
-    { "<leader>gs", mode = "n", desc = "Neogit status" },
-    { "<leader>gt", "<cmd>Neogit<CR>", mode = "n", desc = "Neogit" },
-    { "<leader>gb", "<cmd>Neogit branch<CR>", mode = "n", desc = "Neogit branches" },
-    { "<leader>gz", "<cmd>Neogit stash<CR>", mode = "n", desc = "Neogit stash" },
+    { "<leader>gs", desc = "Neogit status" },
+    { "<leader>gt", "<cmd>Neogit<CR>", desc = "Neogit" },
+    { "<leader>gb", "<cmd>Neogit branch<CR>", desc = "Neogit branches" },
+    { "<leader>gz", "<cmd>Neogit stash<CR>", desc = "Neogit stash" },
   },
   init = function()
     vim.api.nvim_create_autocmd("User", {
@@ -37,40 +37,15 @@ return {
     },
   },
   config = function()
+    local windows = require("utils.windows")
+
     vim.keymap.set("n", "<leader>gs", function()
-      local win = vim.api.nvim_get_current_win()
-      local ok, ui = pcall(require, "opencode.ui.ui")
       neogit_open_context = {
         tabpage = vim.api.nvim_get_current_tabpage(),
-        redirect = ok and ui.is_opencode_window(win),
+        redirect = windows.is_opencode_window(vim.api.nvim_get_current_win()),
       }
       vim.cmd("Neogit kind=floating")
     end, { desc = "Neogit status" })
-    local function is_opencode_window(win)
-      local ok, ui = pcall(require, "opencode.ui.ui")
-      return ok and ui.is_opencode_window(win)
-    end
-
-    local function leftmost_non_opencode_window(tabpage)
-      local target
-      local target_position
-
-      for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
-        local config = vim.api.nvim_win_get_config(win)
-        if config.relative == "" and not is_opencode_window(win) then
-          local position = vim.api.nvim_win_get_position(win)
-          if not target_position
-            or position[2] < target_position[2]
-            or (position[2] == target_position[2] and position[1] < target_position[1])
-          then
-            target = win
-            target_position = position
-          end
-        end
-      end
-
-      return target
-    end
 
     require("neogit").setup({
       use_default_keymaps = false,
@@ -128,7 +103,7 @@ return {
                 end
 
                 vim.api.nvim_set_current_tabpage(tabpage)
-                local target = leftmost_non_opencode_window(tabpage)
+                local target = windows.leftmost_window(tabpage)
                 if target then
                   vim.api.nvim_set_current_win(target)
                 else

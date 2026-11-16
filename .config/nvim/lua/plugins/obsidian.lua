@@ -3,7 +3,6 @@ return {
   version = "*",
   ft = "markdown",
   dependencies = {
-    -- Required.
     "nvim-lua/plenary.nvim",
   },
   opts = {

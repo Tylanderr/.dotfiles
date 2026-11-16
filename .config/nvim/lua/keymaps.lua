@@ -24,7 +24,7 @@ vim.keymap.set("n", "<c-q>", "<nop>")
 vim.keymap.set("n", "<c-f>", "<nop>")
 
 vim.keymap.set("v", "<leader>s", [[y:%s/\<<C-r>0\>/<C-r>0/gI<Left><Left><Left>]])
-vim.keymap.set({ "n", "v" }, "<leader>=", "mzgg=G`zzz", { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "<leader>=", "mzgg=G`zzz", { silent = true })
 
 vim.keymap.set("n", "<leader>nh", "<cmd>noh<CR>")
 vim.keymap.set("n", "<leader>wv", "<cmd>vsplit<CR>")
@@ -39,7 +39,6 @@ vim.keymap.set("n", "qp", "<cmd>cprev<CR>")
 vim.keymap.set("n", "qc", "<cmd>cclose<CR>")
 vim.keymap.set("n", "qo", function()
   vim.cmd("topleft vertical copen")
-  vim.cmd("wincmd H")
   vim.cmd("vertical resize 50")
 end, { desc = "Open quickfix on the far left", silent = true })
 

@@ -11,6 +11,21 @@ return {
           or (path:match("^%a:") ~= nil and (path:sub(3, 3) == "/" or path:sub(3, 3) == "\\"))
       end
 
+      local function resolve_picker_path(path, pick)
+        if not path or path == "" then
+          return path
+        end
+        if path:match("^%w[%w+.-]*://") then
+          local ok, uri_path = pcall(vim.uri_to_fname, path)
+          return ok and uri_path or nil
+        end
+        if not is_absolute_path(path) then
+          local cwd = pick.get_picker_opts().source.cwd or vim.fn.getcwd()
+          return vim.fs.joinpath(cwd, path)
+        end
+        return path
+      end
+
       require("mini.pick").setup({
         mappings = {
           choose_in_split = "",
@@ -44,15 +59,7 @@ return {
                     filename = vim.api.nvim_buf_get_name(bufnr)
                   end
                   local valid_buffer = bufnr and vim.api.nvim_buf_is_valid(bufnr)
-                  if filename and filename ~= "" then
-                    if filename:match("^%w[%w+.-]*://") then
-                      local ok, uri_path = pcall(vim.uri_to_fname, filename)
-                      filename = ok and uri_path or nil
-                    elseif not is_absolute_path(filename) then
-                      local cwd = pick.get_picker_opts().source.cwd or vim.fn.getcwd()
-                      filename = vim.fs.joinpath(cwd, filename)
-                    end
-                  end
+                  filename = resolve_picker_path(filename, pick)
                   if (filename and filename ~= "") or valid_buffer then
                     entry = {
                       bufnr = valid_buffer and bufnr or nil,
@@ -71,13 +78,7 @@ return {
                   if buffer_id and vim.api.nvim_buf_is_valid(buffer_id) then
                     entry = { bufnr = buffer_id, lnum = tonumber(lnum) or 1, col = tonumber(col) or 1, text = text or "" }
                   elseif path ~= "" then
-                    if path:match("^%w[%w+.-]*://") then
-                      local ok, uri_path = pcall(vim.uri_to_fname, path)
-                      path = ok and uri_path or nil
-                    elseif path and not is_absolute_path(path) then
-                      local cwd = pick.get_picker_opts().source.cwd or vim.fn.getcwd()
-                      path = vim.fs.joinpath(cwd, path)
-                    end
+                    path = resolve_picker_path(path, pick)
                     if path then
                       entry = {
                         filename = path,
@@ -103,13 +104,7 @@ return {
               local title = picker_opts.source.name or "MiniPick"
               local query = table.concat(pick.get_picker_query())
               if query ~= "" then title = title .. " : " .. query end
-              require("utils.quickfix")
-              vim.fn.setqflist({}, " ", {
-                items = qf_items,
-                title = title,
-                nr = "$",
-                quickfixtextfunc = "v:lua.QuickfixFilenameText",
-              })
+              require("utils.quickfix").set(qf_items, title)
               vim.schedule(function()
                 pcall(vim.cmd, "cc 1")
               end)
@@ -154,23 +149,18 @@ return {
         }, opts)
       end
 
-      local map = vim.keymap.set
-      map("n", "<leader>fd", function() require("mini.extra").pickers.diagnostic({ scope = "current" }) end, { desc = "Document diagnostics" })
-      map("n", "<leader>fh", function() require("mini.pick").builtin.help() end, { desc = "Help pages" })
-      map("n", "<leader>fk", function() require("mini.extra").pickers.keymaps() end, { desc = "Keymaps" })
-      map("n", "<leader><leader>", function() require("mini.pick").builtin.buffers() end, { desc = "Buffers" })
-      map("n", "<leader>u", function() local tree = vim.fn.undotree() local entries, seen = {}, {}
+      local function show_undo_history()
+        local tree = vim.fn.undotree()
+        local entries, seen = {}, {}
         local function add_entry(entry)
-          if type(entry) ~= "table" or not entry.seq or seen[entry.seq] then
+          if not entry.seq or seen[entry.seq] then
             return
           end
           seen[entry.seq] = true
           table.insert(entries, entry)
-          if type(entry.alt) == "table" then
+          if entry.alt then
             for _, alternate in ipairs(entry.alt) do
-              if type(alternate) == "table" then
-                add_entry(alternate)
-              end
+              add_entry(alternate)
             end
           end
         end
@@ -185,7 +175,7 @@ return {
         local items = {}
         for _, entry in ipairs(entries) do
           local time = entry.time and os.date("%Y-%m-%d %H:%M:%S", entry.time)
-          or "unknown time"
+            or "unknown time"
           local current = entry.seq == tree.seq_cur and " [current]" or ""
           table.insert(items, {
             seq = entry.seq,
@@ -204,11 +194,18 @@ return {
             return item.text
           end,
         }, function(item)
-            if item then
-              vim.cmd("undo " .. item.seq)
-            end
-          end)
-      end, { desc = "Undo history" })
+          if item then
+            vim.cmd("undo " .. item.seq)
+          end
+        end)
+      end
+
+      local map = vim.keymap.set
+      map("n", "<leader>fd", function() require("mini.extra").pickers.diagnostic({ scope = "current" }) end, { desc = "Document diagnostics" })
+      map("n", "<leader>fh", function() require("mini.pick").builtin.help() end, { desc = "Help pages" })
+      map("n", "<leader>fk", function() require("mini.extra").pickers.keymaps() end, { desc = "Keymaps" })
+      map("n", "<leader><leader>", function() require("mini.pick").builtin.buffers() end, { desc = "Buffers" })
+      map("n", "<leader>u", show_undo_history, { desc = "Undo history" })
     end,
   },
 }

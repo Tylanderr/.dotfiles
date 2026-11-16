@@ -33,10 +33,6 @@ local function setup_term_keymaps(buf)
 end
 
 local function ensure_terminal(buf)
-  if vim.bo[buf].buftype == "terminal" then
-    return
-  end
-
   vim.api.nvim_buf_call(buf, function()
     vim.fn.jobstart(vim.o.shell, {
       term = true,
@@ -44,31 +40,6 @@ local function ensure_terminal(buf)
   end)
 
   setup_term_keymaps(buf)
-end
-
-local function leftmost_non_opencode_window()
-  local ok, ui = pcall(require, "opencode.ui.ui")
-  local target = nil
-  local target_col = math.huge
-
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local config = vim.api.nvim_win_get_config(win)
-
-    if config.relative == "" then
-      local is_opencode = ok and ui.is_opencode_window(win)
-
-      if not is_opencode then
-        local position = vim.api.nvim_win_get_position(win)
-
-        if position[2] < target_col then
-          target_col = position[2]
-          target = win
-        end
-      end
-    end
-  end
-
-  return target
 end
 
 local function toggle_left_terminal()
@@ -88,7 +59,7 @@ local function toggle_left_terminal()
     return
   end
 
-  local target = leftmost_non_opencode_window()
+  local target = require("utils.windows").leftmost_window(0)
 
   if not target then
     vim.notify("No non-opencode window available", vim.log.levels.WARN)

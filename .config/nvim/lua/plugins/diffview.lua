@@ -78,19 +78,7 @@ return {
         vim.cmd("1tabnext")
 
         local api = vim.api
-        local leftmost_win
-        local leftmost_position
-        for _, win in ipairs(api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())) do
-          local position = api.nvim_win_get_position(win)
-          if
-            not leftmost_position
-            or position[2] < leftmost_position[2]
-            or (position[2] == leftmost_position[2] and position[1] < leftmost_position[1])
-          then
-            leftmost_win = win
-            leftmost_position = position
-          end
-        end
+        local leftmost_win = require("utils.windows").leftmost_window(0, { include_opencode = true })
 
         if leftmost_win then
           api.nvim_set_current_win(leftmost_win)

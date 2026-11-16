@@ -51,23 +51,11 @@ return {
       }
     })
     local function open_oil(as_float)
-      local ok, ui = pcall(require, "opencode.ui.ui")
+      local windows = require("utils.windows")
       local current_win = vim.api.nvim_get_current_win()
 
-      if ok and ui.is_opencode_window(current_win) then
-        local target_win
-        local leftmost_col = math.huge
-
-        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-          if not ui.is_opencode_window(win) then
-            local position = vim.api.nvim_win_get_position(win)
-            if position[2] < leftmost_col then
-              leftmost_col = position[2]
-              target_win = win
-            end
-          end
-        end
-
+      if windows.is_opencode_window(current_win) then
+        local target_win = windows.leftmost_window(0)
         if target_win then
           vim.api.nvim_set_current_win(target_win)
         end

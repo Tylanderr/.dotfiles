@@ -61,11 +61,7 @@ local function send_fff_to_quickfix()
 
   local is_grep = state.mode == "grep"
   require("fff.picker_ui.layout_manager").close()
-  require("utils.quickfix")
-  vim.fn.setqflist({}, " ", {
-    items = qf_items,
-    quickfixtextfunc = "v:lua.QuickfixFilenameText",
-  })
+  require("utils.quickfix").set(qf_items)
   pcall(vim.cmd, "cc 1")
 
   local count = #qf_items
@@ -95,19 +91,9 @@ return {
     select = {
       select_window = function(current_buf, action)
         local current_win = vim.api.nvim_get_current_win()
-        local ok, ui = pcall(require, "opencode.ui.ui")
-        if ok and ui.is_opencode_window(current_win) then
-          local target, target_col
-          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-            local config = vim.api.nvim_win_get_config(win)
-            if config.relative == "" and not ui.is_opencode_window(win) then
-              local col = vim.api.nvim_win_get_position(win)[2]
-              if not target_col or col < target_col then
-                target, target_col = win, col
-              end
-            end
-          end
-
+        local windows = require("utils.windows")
+        if windows.is_opencode_window(current_win) then
+          local target = windows.leftmost_window(0)
           if not target then
             vim.cmd("topleft vsplit")
             target = vim.api.nvim_get_current_win()
@@ -138,14 +124,18 @@ return {
       callback = function()
         local state = require("fff.picker_ui.picker_ui_state").state
         local action = send_fff_to_quickfix
-        if state.input_buf and vim.api.nvim_buf_is_valid(state.input_buf) then
-          vim.keymap.set({ "i", "n" }, "<C-q>", action, { buffer = state.input_buf, silent = true, desc = "Send matches to quickfix" })
-        end
-        if state.list_buf and vim.api.nvim_buf_is_valid(state.list_buf) then
-          vim.keymap.set("n", "<C-q>", action, { buffer = state.list_buf, silent = true, desc = "Send matches to quickfix" })
-        end
-        if state.preview_buf and vim.api.nvim_buf_is_valid(state.preview_buf) then
-          vim.keymap.set("n", "<C-q>", action, { buffer = state.preview_buf, silent = true, desc = "Send matches to quickfix" })
+        for _, mapping in ipairs({
+          { buf = state.input_buf, modes = { "i", "n" } },
+          { buf = state.list_buf, modes = "n" },
+          { buf = state.preview_buf, modes = "n" },
+        }) do
+          if mapping.buf and vim.api.nvim_buf_is_valid(mapping.buf) then
+            vim.keymap.set(mapping.modes, "<C-q>", action, {
+              buffer = mapping.buf,
+              silent = true,
+              desc = "Send matches to quickfix",
+            })
+          end
         end
       end,
       desc = "Override fff quickfix send to keep the list closed",

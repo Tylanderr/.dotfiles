@@ -89,11 +89,7 @@ return {
               end
 
               if #items > 1 then
-                local picker_items = vim.tbl_map(picker_item, items)
-
-                require("mini.pick").start({
-                  source = { items = picker_items, name = list.title },
-                })
+                pick_unique_locations(list)
               end
             end,
           })
@@ -112,12 +108,6 @@ return {
         map("<leader>lr", "<cmd>lsp restart<CR>", "Restart LSP")
       end,
     })
-
-    local function tableMerge(t1, t2)
-      for _, v in ipairs(t2) do
-        table.insert(t1, v)
-      end
-    end
 
     local active = {
       "html",
@@ -140,14 +130,12 @@ return {
     }
 
     if vim.fn.hostname() == "tjh" then
-      tableMerge(active, home_servers)
+      vim.list_extend(active, home_servers)
     else
-      tableMerge(active, work_servers)
+      vim.list_extend(active, work_servers)
     end
 
-    for _, server in pairs(active) do
-      vim.lsp.enable(server)
-    end
+    vim.lsp.enable(active)
 
     vim.diagnostic.config({
       virtual_text = false,

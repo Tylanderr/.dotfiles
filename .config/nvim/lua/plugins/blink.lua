@@ -11,13 +11,8 @@ return {
   ---@type blink.cmp.Config
   opts = {
     keymap = {
-      preset = "default",
       ["<c-g>"] = { "show_documentation", "hide_documentation", "fallback" },
       ["<space>"] = false,
-    },
-
-    appearance = {
-      nerd_font_variant = "mono"
     },
 
     completion = {
@@ -30,10 +25,6 @@ return {
       },
     },
 
-    sources = {
-      default = { "lsp", "path", "snippets", "buffer" },
-    },
-
     cmdline = {
       keymap = { preset = "inherit" },
       completion = {
@@ -42,7 +33,6 @@ return {
       },
     },
 
-    fuzzy = { implementation = "prefer_rust_with_warning" }
   },
   opts_extend = { "sources.default" },
   config = function(_, opts)

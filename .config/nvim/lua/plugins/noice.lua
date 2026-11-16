@@ -66,12 +66,6 @@ return {
         opts = { replace = true, merge = false },
       },
     },
-    views = {
-      notify = {
-        replace = true,
-        merge = false,
-      },
-    },
     messages = {
       enabled = true
     },

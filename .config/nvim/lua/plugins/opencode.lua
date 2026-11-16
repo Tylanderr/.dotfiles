@@ -154,17 +154,7 @@ return {
     end
 
     local function toggle_panel()
-      local restore_to_previous_window_flag = false
-      if restore_to_previous_window_flag then
-        local previous_win = api.nvim_get_current_win()
-        return require("opencode.api").toggle():finally(function()
-          if api.nvim_win_is_valid(previous_win) then
-            api.nvim_set_current_win(previous_win)
-          end
-        end)
-      else
-        return require("opencode.api").toggle()
-      end
+      return require("opencode.api").toggle()
     end
 
     local function add_current_file()
@@ -379,23 +369,13 @@ return {
 
     local function close_other_windows()
       local current_win = api.nvim_get_current_win()
-      local ok, ui = pcall(require, "opencode.ui.ui")
-      local focused_is_opencode = ok and ui.is_opencode_window(current_win)
+      local window_utils = require("utils.windows")
+      local focused_is_opencode = window_utils.is_opencode_window(current_win)
 
       -- Keep the leftmost non-OpenCode window when focused on OpenCode.
       local leftmost
-      if focused_is_opencode and ok then
-        local leftmost_col = math.huge
-        for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
-          local config = api.nvim_win_get_config(win)
-          if config.relative == "" and not ui.is_opencode_window(win) then
-            local position = api.nvim_win_get_position(win)
-            if position[2] < leftmost_col then
-              leftmost_col = position[2]
-              leftmost = win
-            end
-          end
-        end
+      if focused_is_opencode then
+        leftmost = window_utils.leftmost_window(0)
       end
 
       for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
