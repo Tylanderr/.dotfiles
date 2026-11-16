@@ -6,16 +6,20 @@ and approve each change before you move to the next one.
 
 ## ONE REVIEW UNIT AT A TIME
 
-A review unit is one method, function, constructor, or test method, plus only
-the imports, fields, constants, or minimal scaffolding it directly requires.
-For work that is not naturally a method, make one small cohesive change of
-roughly 40 lines or fewer.
+A review unit is normally one method, function, constructor, or test method,
+plus only the imports, fields, constants, or minimal scaffolding it directly
+requires. If correctness requires coordinated edits, propose the smallest
+cohesive multi-symbol or multi-file change and get approval for that unit before
+editing. For work that is not naturally a method, make one small cohesive
+change of roughly 40 lines or fewer.
 
-- Never implement multiple methods in one edit or tool call.
+- Never implement multiple methods in one edit or tool call unless the user
+  explicitly approved a proposed cohesive unit that requires those methods.
 - When a new file is needed, create only the scaffold needed for the current
   unit; add other methods in later units.
 - If a unit needs to change callers or other methods, explain the dependency
-  and schedule those as separate units. Keep the code in a reasonable state
+  and either include the minimal coordinated change in the proposed unit or
+  schedule dependent edits separately. Keep the code in a reasonable state
   between steps, and say when an intermediate step is temporarily incomplete.
 - If a method is too large to review comfortably, propose splitting it into
   smaller methods before editing.
@@ -28,16 +32,21 @@ roughly 40 lines or fewer.
 1. Read the user's plan and inspect the relevant code, conventions, and tests.
 2. Break the work into an ordered list of review units, naming the file and
    symbol for each. Use the todo list if available.
-3. Present the list, uncertainties, and any needed decisions. Wait for the user
-   to type `approve` before writing code. If they respond otherwise,
-   ask what should change and revise the plan.
+3. Present the ordered list, uncertainties, and the first unit you propose to
+   implement. Before editing, call the `question` tool with one question whose
+   first option is `Approve next unit` and whose other options let the user
+   request changes or decline. Stop until the question is answered. Approval
+   authorizes only that displayed unit, never later units. If the user requests
+   changes or declines, revise the plan or stop without editing.
 
 ### Each unit
 
-1. State the single unit you are about to implement.
-2. After the user approves the unit with `approve`, make only that
-   unit's edit without waiting for or requesting a second permission prompt.
-   Do not combine separate units into a multi-file patch.
+1. State the single next unit to implement, including what was completed in the
+   previous unit when applicable.
+2. Before editing, call the `question` tool with `Approve next unit` as its
+   first option and alternatives to request changes or decline. Wait for the
+   answer. Proceed only when the user selects approval, and make only that
+   unit's edit. Approval does not bypass tool-level permission prompts.
 3. Report the changed file and symbol, behavior and important edge cases,
    decisions to review, verification actually performed, and the next unit.
  4. Stop after reporting; continue only when the user approves with `approve`
@@ -68,9 +77,10 @@ roughly 40 lines or fewer.
 
 ## VERIFICATION AND CODE QUALITY
 
-- Do not run builds or tests after every small edit. Offer verification at a
-  natural checkpoint or when the user asks. Use only commands permitted by
-  the configured permissions.
+- Do not run builds or tests after every small edit. Propose relevant
+  verification after a complete behavior change and before reporting the task
+  complete; run it only when requested or approved at that checkpoint. Use only
+  commands permitted by the configured permissions.
 - Follow established repository conventions. Inspect patterns before
   proposing a new one.
 - Report actual command results. Never claim an unrun test passed.

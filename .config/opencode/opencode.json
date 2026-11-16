@@ -61,7 +61,7 @@
     }
   },
 
-  "default_agent": "poc",
+  "default_agent": "coworker",
 
   "agent": {
     "plan": {
@@ -76,9 +76,12 @@
       "mode": "primary",
       "model": "github-copilot/gpt-6.1-sol",
       "reasoningEffort": "medium",
-      "description": "Custom agent to act as a coworker",
+      "description": "Read-only engineering advisor for code investigation, explanations, trade-off analysis, and implementation planning",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
       "permission": {
+        "external_directory": {
+          "*": "ask"
+        },
         "bash": {
           "*": "deny",
           "pwd": "allow",
@@ -116,6 +119,7 @@
       "steps": 40,
       "permission": {
         "task": "deny",
+        "question": "allow",
         "external_directory": {
           "*": "deny"
         },
@@ -201,8 +205,12 @@
           ".git/*": "deny",
           "*/.git": "deny",
           "*/.git/*": "deny",
-          ".config/opencode/**": "allow",
-          "*/.config/opencode/**": "allow"
+          "opencode.json": "deny",
+          "opencode.jsonc": "deny",
+          ".opencode/**": "deny",
+          "*/.opencode/**": "deny",
+          ".config/opencode/**": "deny",
+          "*/.config/opencode/**": "deny"
         },
         "bash": {
           "*": "ask",
@@ -213,7 +221,21 @@
           "file *": "allow",
           "stat *": "allow",
           "wc *": "allow",
-          "git *": "allow",
+          "git status": "allow",
+          "git status *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git log": "allow",
+          "git log *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "git branch --show-current": "allow",
+          "git rev-parse --show-toplevel": "allow",
+          "git add *": "ask",
+          "git commit": "allow",
+          "git commit *": "allow",
+          "git push": "ask",
+          "git push *": "ask",
           "mvn *": "allow",
           "./mvnw *": "allow",
           "npm *": "allow",
@@ -232,8 +254,12 @@
           "git push *-d *": "deny",
           "git push *--tags*": "deny",
           "git push *--no-verify*": "deny",
-          "git commit *--no-verify*": "deny",
           "git commit *--amend*": "ask",
+          "git commit *--no-verify*": "deny",
+          "git checkout": "deny",
+          "git checkout *": "deny",
+          "git switch": "deny",
+          "git switch *": "deny",
           "git -C *": "deny",
           "git --git-dir*": "deny",
           "git --work-tree*": "deny",
@@ -243,19 +269,16 @@
           "git remote remove *": "deny",
           "git remote rm *": "deny",
           "git remote rename *": "deny",
-          "git worktree *": "ask",
-          "git submodule *": "ask",
-          "git rebase *": "ask",
-          "git merge *": "ask",
-          "git cherry-pick *": "ask",
-          "git reset *": "ask",
-          "git clean *": "ask",
-          "git branch -d *": "ask",
-          "git branch -D *": "ask",
-          "git checkout *": "ask",
-          "git switch *": "ask",
-          "git switch -c poc/*": "allow",
-          "git stash *": "ask",
+          "git worktree *": "deny",
+          "git submodule *": "deny",
+          "git rebase *": "deny",
+          "git merge *": "deny",
+          "git cherry-pick *": "deny",
+          "git reset *": "deny",
+          "git clean *": "deny",
+          "git branch -d *": "deny",
+          "git branch -D *": "deny",
+          "git stash *": "deny",
           "git filter-branch *": "deny",
           "git filter-repo *": "deny",
           "git update-ref *": "deny",

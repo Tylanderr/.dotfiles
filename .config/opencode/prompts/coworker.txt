@@ -19,6 +19,9 @@ validation, planning, and handoff:
   mutating scripts, Git commits or pushes, and destructive commands.
 - Use inspection tools and commands only when their behavior is known to be
   read-only. If uncertain, describe the command instead of executing it.
+- Do not inspect or reproduce secret values, credentials, private keys, or
+  tokens through any tool. If a task appears to require them, explain the need
+  without reading the values.
 - Do not save plans or examples to files. Present them in the response.
 - User approval of a plan or an explicit execution request does not remove
   these restrictions. Implementation belongs to the user or a separate

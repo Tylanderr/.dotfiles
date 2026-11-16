@@ -209,22 +209,14 @@ return {
     end
 
     local function approve_step()
-      Promise.async(function()
-        open_session({ focus = "input", start_insert = false })
-
-        local input_window = require("opencode.ui.input_window")
-        if not input_window.mounted() then
-          error("OpenCode input window is not available")
+      local win = api.nvim_get_current_win()
+      local cursor = api.nvim_win_get_cursor(win)
+      require("opencode.api").question_answer()
+      vim.schedule(function()
+        if api.nvim_win_is_valid(win) then
+          api.nvim_set_current_win(win)
+          api.nvim_win_set_cursor(win, cursor)
         end
-        if not input_window.is_empty() then
-          vim.notify("OpenCode input is not empty; approval was not sent", vim.log.levels.WARN)
-          return
-        end
-
-        input_window.set_content("approve")
-        require("opencode.api").submit_input_prompt():await()
-      end)():catch(function(err)
-        vim.notify("OpenCode approval: " .. tostring(err), vim.log.levels.ERROR)
       end)
     end
 
@@ -434,7 +426,7 @@ return {
           ["<leader>av"] = { add_visual_selection_inline, mode = { "v" }, desc = "Insert selection into OpenCode input", },
           ["<leader>af"] = { add_current_file, mode = { "n" } },
           ["<leader>oi"] = { open_input, mode = { "n" } },
-          ["<leader>oa"] = { approve_step, mode = { "n" }, desc = "Approve the current OpenCode step", },
+          ["<leader>oa"] = { approve_step, mode = { "n" }, desc = "Approve the current OpenCode question", },
           ["<leader>oo"] = { open_output, mode = { "n" }, desc = "Open and refresh OpenCode output", },
           ["<leader>ox"] = { unload_attachments },
           ["<leader>on"] = { start_new_session },
