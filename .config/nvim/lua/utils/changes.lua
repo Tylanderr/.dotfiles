@@ -295,7 +295,7 @@ local function build_model(old_text, new_text)
     end
   end
 
-  for _, hunk in ipairs(hunks) do
+  for hunk_index, hunk in ipairs(hunks) do
     local old_start, old_count, new_start, new_count = hunk[1], hunk[2], hunk[3], hunk[4]
     -- For a zero-count side, the start is the line before the insertion point.
     if old_count == 0 then old_start = old_start + 1 end
@@ -308,10 +308,11 @@ local function build_model(old_text, new_text)
       push(old_lines[old_start + i], {
         kind = i < paired and "change_old" or "delete",
         old = old_start + i,
+        hunk = hunk_index,
       })
     end
     for i = 0, new_count - 1 do
-      local info = { kind = i < paired and "change_new" or "add", new = new_start + i }
+      local info = { kind = i < paired and "change_new" or "add", new = new_start + i, hunk = hunk_index }
       if i < paired then
         info.pair = first_old_row + i
       end
@@ -324,6 +325,78 @@ local function build_model(old_text, new_text)
   model.folds = compute_folds(model.rows)
   model.number_width = #tostring(math.max(#old_lines, #new_lines, 1))
   return model
+end
+
+-- Map the line ranges changed by one agent write onto the current HEAD diff.
+-- Agent events identify a file but not a line range, so compare snapshots taken
+-- while the review is open to locate the hunk that changed in this write.
+local function latest_edit_hunk(model, previous_text, current_text)
+  local edits = vim.text.diff(previous_text, current_text, {
+    result_type = "indices",
+    algorithm = "histogram",
+    indent_heuristic = true,
+    linematch = 60,
+  })
+  local result
+
+  -- TODO(poc): the file-edited event gives us no line/range metadata, so if a
+  -- single write changes several separate ranges, use the last diff range as
+  -- the best available proxy for the most recently edited hunk.
+  for _, edit in ipairs(edits or {}) do
+    local old_start, old_count, new_start, new_count = edit[1], edit[2], edit[3], edit[4]
+    if old_count == 0 then old_start = old_start + 1 end
+    if new_count == 0 then new_start = new_start + 1 end
+    if new_count > 0 then
+      local best, best_distance
+      for row, info in ipairs(model.rows) do
+        if info.new and info.hunk then
+          local distance = info.new < new_start and new_start - info.new
+            or info.new >= new_start + new_count and info.new - (new_start + new_count - 1)
+            or 0
+          if not best_distance or distance < best_distance then
+            best, best_distance = info.hunk, distance
+          end
+        end
+      end
+      if best then result = best end
+    elseif old_count > 0 then
+      -- A deletion has no new-side row. Locate its insertion boundary among
+      -- the surviving lines around each deleted hunk instead of comparing
+      -- working-tree line numbers to HEAD's old-side line numbers.
+      local ranges = {}
+      for row, info in ipairs(model.rows) do
+        if info.hunk then
+          local range = ranges[info.hunk] or { first = row, last = row }
+          range.first, range.last = math.min(range.first, row), math.max(range.last, row)
+          ranges[info.hunk] = range
+        end
+      end
+      local best, best_distance
+      for hunk, range in pairs(ranges) do
+        local before, after
+        for row = range.first - 1, 1, -1 do
+          if model.rows[row].new then before = model.rows[row].new; break end
+        end
+        for row = range.last + 1, #model.rows do
+          if model.rows[row].new then after = model.rows[row].new; break end
+        end
+        local distance = before and new_start < before and before - new_start
+          or after and new_start > after and new_start - after
+          or 0
+        if not best_distance or distance < best_distance then
+          best, best_distance = hunk, distance
+        end
+      end
+      if best then result = best end
+    end
+  end
+
+  if not result then return nil end
+  for row, info in ipairs(model.rows) do
+    if info.hunk == result and row_highlights[info.kind] then
+      return result, row
+    end
+  end
 end
 
 local function split_characters(text)
@@ -417,7 +490,7 @@ local function apply_syntax(buf, model, path)
   highlight(model.old_text, model.old_rows)
 end
 
-local function render_diff(review, model, file, preserve_cursor)
+local function render_diff(review, model, file, preserve_cursor, target_row)
   if not is_current_review(review) then return end
   local buf, win = review.buf, review.win
   local cursor = preserve_cursor and api.nvim_win_get_cursor(win) or nil
@@ -464,10 +537,13 @@ local function render_diff(review, model, file, preserve_cursor)
     pcall(vim.cmd, "normal! zM")
   end)
 
-  local row = cursor and math.min(cursor[1], math.max(1, #model.lines)) or model.first_change or 1
+  local row = target_row or (cursor and math.min(cursor[1], math.max(1, #model.lines))) or model.first_change or 1
   api.nvim_win_set_cursor(win, { row, 0 })
-  if not cursor and model.first_change then
-    api.nvim_win_call(win, function() vim.cmd("normal! zz") end)
+  if (target_row or not cursor) and row then
+    api.nvim_win_call(win, function()
+      vim.cmd("normal! zv")
+      vim.cmd("normal! zz")
+    end)
   end
 end
 
@@ -715,8 +791,15 @@ load_file = function(review, index)
       model = build_model(old_text, new_text)
         or message_model({ ("No textual changes in %s (mode change or submodule?)."):format(file.path) })
     end
-    render_diff(review, model, file, preserve_cursor)
-    if review.resume_bookmark and review.resume_bookmark.selected_path == file.path then
+    local target_row
+    local latest_edit = review.latest_edit
+    if latest_edit and latest_edit.path == file.path then
+      if latest_edit.old_text and latest_edit.new_text then
+        model.latest_hunk, target_row = latest_edit_hunk(model, latest_edit.old_text, latest_edit.new_text)
+      end
+    end
+    render_diff(review, model, file, preserve_cursor and not target_row, target_row)
+    if not target_row and review.resume_bookmark and review.resume_bookmark.selected_path == file.path then
       local cursor = review.resume_bookmark.cursor
       if cursor then
         local row = math.max(1, math.min(cursor[1], #model.lines))
@@ -767,7 +850,7 @@ refresh = function(review)
   end
 
   local selected = review.files[review.index or 0]
-  local selected_path = selected and selected.path
+  local selected_path = (review.latest_edit and review.latest_edit.path) or (selected and selected.path)
     or (review.resume_bookmark and review.resume_bookmark.selected_path)
   local cwd = vim.fn.getcwd()
   local source = api.nvim_buf_is_valid(review.previous_buf) and api.nvim_buf_get_name(review.previous_buf) or ""
@@ -807,6 +890,13 @@ refresh = function(review)
               local file = { path = path, status = "?", additions = 0, deletions = 0 }
               add_untracked_stats(file, root)
               files[#files + 1] = file
+            end
+          end
+
+          review.snapshots = review.snapshots or {}
+          for _, file in ipairs(files) do
+            if review.snapshots[file.path] == nil then
+              review.snapshots[file.path] = read_file(root .. "/" .. file.path) or ""
             end
           end
 
@@ -886,7 +976,7 @@ local function create_review(tabpage, win, opts)
     callback = function() models[buf] = nil end,
   })
 
-  if not opts or opts.panel_open ~= false then
+  if opts and opts.panel_open == true then
     open_panel(review)
   end
   show_message(review, { "Loading changes…" })
@@ -900,7 +990,7 @@ function M.statuscolumn()
   local info = model and model.rows[vim.v.lnum]
   local width = model and model.number_width or 1
   if not info or vim.v.virtnum ~= 0 then
-    return "%C" .. string.rep(" ", width * 2 + 4)
+    return "%C" .. string.rep(" ", width * 2 + 5)
   end
 
   local function number(value)
@@ -912,8 +1002,59 @@ function M.statuscolumn()
   elseif info.old and info.kind ~= "context" then
     sign, group = "-", "AgentChangesPanelDeletions"
   end
-  return ("%%C%%#LineNr#%s %s %%#%s#%s%%* "):format(number(info.old), number(info.new), group, sign)
+  local marker = sign == " " and "  " or sign .. (info.hunk == model.latest_hunk and sign or " ")
+  return ("%%C%%#LineNr#%s %s %%#%s#%s%%* "):format(number(info.old), number(info.new), group, marker)
 end
+
+local function agent_file_changed(args)
+  local event = args.data and args.data.event
+  local properties = event and event.properties
+  local changed_path = properties and properties.file
+  if type(changed_path) ~= "string" or changed_path == "" then return end
+
+  for _, review in pairs(reviews) do
+    if is_current_review(review) and review.root then
+      local absolute = changed_path:sub(1, 1) == "/" and changed_path
+        or review.root .. "/" .. changed_path
+      absolute = vim.fs.normalize(absolute)
+      local root = vim.fs.normalize(review.root)
+      local prefix = root .. "/"
+      if absolute:sub(1, #prefix) ~= prefix then
+        goto continue
+      end
+      local path = absolute:sub(#prefix + 1)
+      local current_text = read_file(absolute) or ""
+
+      local previous_text = review.snapshots and review.snapshots[path]
+      if previous_text == current_text then goto continue end
+      review.snapshots = review.snapshots or {}
+      review.snapshots[path] = current_text
+      review.edit_sequence = (review.edit_sequence or 0) + 1
+      local sequence = review.edit_sequence
+      local function record_edit(old_text)
+        if not is_current_review(review) or review.edit_sequence ~= sequence then return end
+        review.latest_edit = { path = path, old_text = old_text, new_text = current_text }
+        refresh(review)
+      end
+      if previous_text ~= nil then
+        record_edit(previous_text)
+      else
+        -- The review may have opened before this file had any working-tree diff.
+        -- Seed its first agent edit from HEAD (or empty text for a new file).
+        run_git({ "cat-file", "-p", "HEAD:" .. path }, root, function(result)
+          record_edit(result.code == 0 and (result.stdout or "") or "")
+        end, true)
+      end
+    end
+    ::continue::
+  end
+end
+
+api.nvim_create_autocmd("User", {
+  pattern = { "OpencodeEvent:file.edited", "OpencodeEvent:file.watcher.updated" },
+  group = api.nvim_create_augroup("AgentChangesAgentEdits", { clear = true }),
+  callback = agent_file_changed,
+})
 
 local function current_review_file()
   local review = reviews[api.nvim_get_current_tabpage()]
