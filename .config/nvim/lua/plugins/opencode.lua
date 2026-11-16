@@ -11,6 +11,27 @@ return {
     local context = require("opencode.context")
     local session_runtime = require("opencode.services.session_runtime")
     local agent_model = require("opencode.services.agent_model")
+    local config_file = require("opencode.config_file")
+
+    local nvim_agents = {
+      coworker = true,
+      cobuild = true,
+    }
+
+    local get_opencode_agents = config_file.get_opencode_agents
+    config_file.get_opencode_agents = Promise.async(function()
+      local agents = get_opencode_agents():await()
+      return vim.tbl_filter(function(agent)
+        return nvim_agents[agent] == true
+      end, agents)
+    end)
+
+    local apply_server_agent = agent_model.apply_server_agent
+    agent_model.apply_server_agent = function(agent)
+      if nvim_agents[agent] then
+        apply_server_agent(agent)
+      end
+    end
 
     local opencode_filetypes = {
       opencode = true,
@@ -24,7 +45,7 @@ return {
         model = "gpt-6.1-sol",
         variant = "medium",
       },
-      build = {
+      cobuild = {
         provider = "github-copilot",
         model = "gpt-6-luna",
         variant = "xhigh",
@@ -45,7 +66,7 @@ return {
       async(function()
         local state = require("opencode.state")
         local current_mode = state.store.get("current_mode")
-        local next_mode = current_mode == "coworker" and "build" or "coworker"
+        local next_mode = current_mode == "coworker" and "cobuild" or "coworker"
 
         if not agent_model.switch_to_mode(next_mode):await() then
           return
@@ -144,23 +165,6 @@ return {
       else
         return require("opencode.api").toggle()
       end
-    end
-
-    local function add_current_text_as_context()
-      local current_win = api.nvim_get_current_win()
-
-      if not context.add_visual_selection() then
-        return
-      end
-
-      async(function()
-        open_session({ new_session = false })
-        if api.nvim_win_is_valid(current_win) then
-          api.nvim_set_current_win(current_win)
-        end
-
-        vim.cmd("stopinsert")
-      end)
     end
 
     local function add_current_file()
@@ -415,11 +419,9 @@ return {
 
       context = {
         current_file = {
-          enabled = true,
           enabled = false,
         },
         diagnostics = {
-          enabled = true,
           enabled = false,
         }
       },
@@ -429,7 +431,6 @@ return {
           ["<C-\\>"] = { toggle_panel },
           ["<leader>/"] = { "quick_chat", mode = { "n", "x" } },
           ["<leader>ot"] = { "configure_variant" },
-          ["<leader>av"] = { add_current_text_as_context, mode = { "n", "v" }, desc = "Add selection as OpenCode context", },
           ["<leader>av"] = { add_visual_selection_inline, mode = { "v" }, desc = "Insert selection into OpenCode input", },
           ["<leader>af"] = { add_current_file, mode = { "n" } },
           ["<leader>oi"] = { open_input, mode = { "n" } },
