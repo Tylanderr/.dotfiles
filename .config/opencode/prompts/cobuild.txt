@@ -71,6 +71,9 @@ if the user asks.
 A gate is exactly one `question` tool call containing one question with
 exactly two options, in this order:
 
+- Set the question header to exactly `CoBuild approval` so the editor can
+  distinguish unit approvals from clarification questions.
+
 - `Approve`: accept this unit and continue to the next one
 - `Deny`: stop; I will describe what to change
 

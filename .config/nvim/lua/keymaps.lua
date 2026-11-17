@@ -32,7 +32,23 @@ vim.keymap.set("n", "<leader>ws", "<cmd>split<CR>")
 
 vim.keymap.set("n", "<leader>sft", function() print(vim.bo.filetype) end)
 
-vim.keymap.set("n", "<leader>i", "1<C-w>w")
+vim.keymap.set("n", "<leader>i", function()
+  local api = vim.api
+
+  for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
+    if vim.bo[api.nvim_win_get_buf(win)].filetype == "AgentChanges" then
+      api.nvim_set_current_win(win)
+      return
+    end
+  end
+
+  local win = require("utils.windows").leftmost_window(0, {
+    exclude = function(candidate)
+      return vim.bo[api.nvim_win_get_buf(candidate)].filetype == "AgentChangesFiles"
+    end,
+  })
+  if win then api.nvim_set_current_win(win) end
+end, { desc = "Focus changes diff" })
 
 vim.keymap.set("n", "qn", "<cmd>cnext<CR>")
 vim.keymap.set("n", "qp", "<cmd>cprev<CR>")

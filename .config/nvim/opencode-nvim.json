@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "coworker",
+  "agent": {
+    "plan": {
+      "disable": true
+    },
+    "build": {
+      "disable": true
+    },
+    "general": {
+      "disable": true
+    },
+    "explore": {
+      "disable": true
+    },
+    "coworker": {
+      "disable": false
+    },
+    "cobuild": {
+      "disable": false
+    }
+  }
+}

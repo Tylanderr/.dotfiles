@@ -4,6 +4,7 @@ local api = vim.api
 local reviews = {}
 local models = {}
 local resume_bookmarks = {}
+local unit_baselines = {}
 local namespaces = {
   diff = api.nvim_create_namespace("AgentChangesDiff"),
   syntax = api.nvim_create_namespace("AgentChangesSyntax"),
@@ -132,50 +133,6 @@ local function read_file(path)
 end
 
 -- Changed files and tree ------------------------------------------------------
-
-local function parse_name_status(output)
-  local files, by_path = {}, {}
-  local fields = vim.split(output, "\0", { plain = true, trimempty = true })
-  for i = 1, #fields - 1, 2 do
-    local file = {
-      path = fields[i + 1],
-      status = fields[i]:sub(1, 1),
-      additions = 0,
-      deletions = 0,
-    }
-    files[#files + 1] = file
-    by_path[file.path] = file
-  end
-  return files, by_path
-end
-
-local function apply_numstat(by_path, output)
-  for record in vim.gsplit(output, "\0", { plain = true, trimempty = true }) do
-    local added, deleted, path = record:match("^([%d%-]+)\t([%d%-]+)\t(.*)$")
-    local file = path and by_path[path]
-    if file then
-      if added == "-" then
-        file.binary = true
-      else
-        file.additions = tonumber(added) or 0
-        file.deletions = tonumber(deleted) or 0
-      end
-    end
-  end
-end
-
-local function add_untracked_stats(file, root)
-  local contents = read_file(root .. "/" .. file.path)
-  if not contents then
-    return
-  end
-  if contents:sub(1, 8000):find("\0", 1, true) then
-    file.binary = true
-    return
-  end
-  local _, newline_count = contents:gsub("\n", "")
-  file.additions = newline_count + ((#contents > 0 and contents:sub(-1) ~= "\n") and 1 or 0)
-end
 
 local function build_entries(files)
   local root = { dirs = {}, files = {} }
@@ -399,6 +356,109 @@ local function latest_edit_hunk(model, previous_text, current_text)
   end
 end
 
+local function git_result(args, cwd)
+  local command = { "git" }
+  vim.list_extend(command, args)
+  local result = vim.system(command, { cwd = cwd, text = false }):wait()
+  return result.code == 0 and result.stdout or nil
+end
+
+-- Unit baselines ---------------------------------------------------------------
+-- A baseline pins the commit plus the contents of every file that was already
+-- dirty when the unit began (string = contents, false = file did not exist).
+-- Files absent from `files` are unchanged since `head`, so `head` supplies them.
+-- Without a captured baseline the review compares against HEAD.
+
+local function split_nul(output)
+  return vim.tbl_filter(function(path) return path ~= "" end, vim.split(output or "", "\0", { plain = true }))
+end
+
+local function capture_unit_baseline(root)
+  local head = git_result({ "rev-parse", "--verify", "-q", "HEAD" }, root)
+  head = head and vim.trim(head) or false
+  local dirty
+  if head then
+    dirty = git_result({ "diff", "--name-only", "--no-renames", "-z", head, "--" }, root)
+  else
+    dirty = git_result({ "ls-files", "-z" }, root)
+  end
+  local untracked = git_result({ "ls-files", "--others", "--exclude-standard", "-z" }, root)
+  if not dirty or not untracked then
+    return false
+  end
+  local files = {}
+  for _, path in ipairs(split_nul(dirty .. "\0" .. untracked)) do
+    files[path] = read_file(root .. "/" .. path) or false
+  end
+  unit_baselines[vim.fs.normalize(root)] = { head = head, files = files }
+  return true
+end
+
+local function unit_baseline(root)
+  return unit_baselines[vim.fs.normalize(root)] or { head = "HEAD", files = {} }
+end
+
+-- Contents of `path` when the current unit began, or false if it did not exist.
+local function baseline_text(root, path)
+  local baseline = unit_baseline(root)
+  local text = baseline.files[path]
+  if text ~= nil then return text end
+  if not baseline.head then return false end
+  return git_result({ "cat-file", "-p", baseline.head .. ":" .. path }, root) or false
+end
+
+local function looks_binary(text)
+  return text and text:sub(1, 8000):find("\0", 1, true) ~= nil
+end
+
+-- Files whose contents differ from where they stood when the unit began.
+-- Returns nil, message on failure.
+local function collect_unit_files(root)
+  local baseline = unit_baseline(root)
+  local candidates = {}
+  for path in pairs(baseline.files) do
+    candidates[path] = true
+  end
+  local tracked
+  if baseline.head then
+    tracked = git_result({ "diff", "--name-only", "--no-renames", "-z", baseline.head, "--" }, root)
+  else
+    tracked = git_result({ "ls-files", "-z" }, root)
+  end
+  local untracked = git_result({ "ls-files", "--others", "--exclude-standard", "-z" }, root)
+  if not tracked then return nil, "Could not compare working tree with the unit baseline." end
+  if not untracked then return nil, "Could not list untracked files." end
+  for _, path in ipairs(split_nul(tracked .. "\0" .. untracked)) do
+    candidates[path] = true
+  end
+
+  local files = {}
+  for path in pairs(candidates) do
+    local before = baseline_text(root, path)
+    local after = read_file(root .. "/" .. path) or false
+    if before ~= after then
+      local file = {
+        path = path,
+        status = before == false and "A" or after == false and "D" or "M",
+        additions = 0,
+        deletions = 0,
+        old_text = before or "",
+      }
+      if looks_binary(before) or looks_binary(after) then
+        file.binary = true
+      else
+        local hunks = vim.text.diff(file.old_text, after or "", { result_type = "indices" })
+        for _, hunk in ipairs(hunks or {}) do
+          file.deletions = file.deletions + hunk[2]
+          file.additions = file.additions + hunk[4]
+        end
+      end
+      files[#files + 1] = file
+    end
+  end
+  return files
+end
+
 local function split_characters(text)
   local chars, offsets = {}, { 0 }
   for char in text:gmatch("[%z\1-\127\192-\255][\128-\191]*") do
@@ -526,7 +586,7 @@ local function render_diff(review, model, file, preserve_cursor, target_row)
     apply_syntax(buf, model, file.path)
   end
 
-  vim.wo[win][0].winbar = file and (" WORKING TREE vs HEAD - " .. file.path:gsub("%%", "%%%%")) or ""
+  vim.wo[win][0].winbar = file and (" CURRENT UNIT - " .. file.path:gsub("%%", "%%%%")) or ""
   api.nvim_win_call(win, function()
     pcall(vim.cmd, "normal! zE")
     for _, fold in ipairs(model.folds) do
@@ -612,7 +672,7 @@ local function render_panel(review)
 
   newline()
   add("Showing changes for:", "AgentChangesPanelTitle"); newline()
-  add("HEAD", "AgentChangesPanelPath"); newline()
+  add("Current unit", "AgentChangesPanelPath"); newline()
 
   vim.bo[panel.buf].modifiable = true
   api.nvim_buf_set_lines(panel.buf, 0, -1, false, lines)
@@ -750,6 +810,22 @@ local function jump_hunk(review, direction)
   end
 end
 
+-- Resolve a diff row to a line in the working-tree file. Rows without a
+-- new-side line fall back to the next surviving line, then the previous one.
+local function file_position(model, row)
+  local info = model.rows[row]
+  if not info then return nil end
+  if info.new then
+    return info.new, true
+  end
+  for r = row + 1, #model.rows do
+    if model.rows[r].new then return model.rows[r].new, false end
+  end
+  for r = row - 1, 1, -1 do
+    if model.rows[r].new then return model.rows[r].new, false end
+  end
+end
+
 local function goto_file(review)
   local file = review.files[review.index or 0]
   local model = models[review.buf]
@@ -789,7 +865,7 @@ load_file = function(review, index)
         new_text = read_file(review.root .. "/" .. file.path) or ""
       end
       model = build_model(old_text, new_text)
-        or message_model({ ("No textual changes in %s (mode change or submodule?)."):format(file.path) })
+        or message_model({ ("No textual changes in %s."):format(file.path) })
     end
     local target_row
     local latest_edit = review.latest_edit
@@ -800,25 +876,31 @@ load_file = function(review, index)
     end
     render_diff(review, model, file, preserve_cursor and not target_row, target_row)
     if not target_row and review.resume_bookmark and review.resume_bookmark.selected_path == file.path then
-      local cursor = review.resume_bookmark.cursor
-      if cursor then
-        local row = math.max(1, math.min(cursor[1], #model.lines))
-        local col = math.max(0, math.min(cursor[2], #(model.lines[row] or "")))
+      local bm = review.resume_bookmark
+      if bm.cursor then
+        local row = bm.cursor[1]
+        local same = model.rows[row] and model.rows[row].old == bm.old and model.rows[row].new == bm.new
+        if not same then
+          row = (bm.new and model.new_rows and model.new_rows[bm.new])
+            or (bm.old and model.old_rows and model.old_rows[bm.old])
+            or row
+        end
+        row = math.max(1, math.min(row, #model.lines))
+        local col = math.max(0, math.min(bm.cursor[2], #(model.lines[row] or "")))
         api.nvim_win_set_cursor(review.win, { row, col })
-        api.nvim_win_call(review.win, function() vim.cmd("normal! zv") end)
+        api.nvim_win_call(review.win, function()
+          vim.cmd("normal! zv")
+          if same and bm.topline then
+            vim.fn.winrestview({ topline = math.max(1, math.min(bm.topline, row)) })
+          end
+        end)
       end
       review.resume_bookmark = nil
     end
     review.loaded_path = file.path
   end
 
-  if file.binary or file.status == "A" or file.status == "?" then
-    finish("")
-    return
-  end
-  run_git({ "cat-file", "-p", "HEAD:" .. file.path }, review.root, function(result)
-    finish(result.code == 0 and (result.stdout or "") or "")
-  end, true)
+  finish(file.old_text or "")
 end
 
 -- Review lifecycle ------------------------------------------------------------
@@ -850,8 +932,9 @@ refresh = function(review)
   end
 
   local selected = review.files[review.index or 0]
-  local selected_path = (review.latest_edit and review.latest_edit.path) or (selected and selected.path)
-    or (review.resume_bookmark and review.resume_bookmark.selected_path)
+  local selected_path = (review.resume_bookmark and review.resume_bookmark.selected_path)
+    or (review.latest_edit and review.latest_edit.path)
+    or (selected and selected.path)
   local cwd = vim.fn.getcwd()
   local source = api.nvim_buf_is_valid(review.previous_buf) and api.nvim_buf_get_name(review.previous_buf) or ""
   if source ~= "" then
@@ -867,53 +950,36 @@ refresh = function(review)
     end
     review.root = root
 
-    local diff_args = { "diff", "--no-ext-diff", "--no-textconv", "--no-renames", "-z" }
-    local git_args = vim.list_extend(vim.deepcopy(diff_args), { "--name-status", "HEAD", "--" })
-    run_git(git_args, root, function(status_result)
-      if not is_latest() then return end
-      if status_result.code ~= 0 then
-        return show_message(review, { "Could not compare working tree with HEAD.", vim.trim(status_result.stderr or "") })
+    local head = git_result({ "rev-parse", "--verify", "-q", "HEAD" }, root)
+    local baseline = unit_baseline(root)
+    if head and vim.trim(head) ~= "" and baseline.head ~= "HEAD" and baseline.head ~= vim.trim(head) then
+      unit_baselines[vim.fs.normalize(root)] = { head = vim.trim(head), files = {} }
+      review.snapshots, review.latest_edit, review.resume_bookmark = nil, nil, nil
+    end
+
+    local files, err = collect_unit_files(root)
+    if not files then
+      return show_message(review, { err })
+    end
+
+    review.snapshots = review.snapshots or {}
+    for _, file in ipairs(files) do
+      if review.snapshots[file.path] == nil then
+        review.snapshots[file.path] = read_file(root .. "/" .. file.path) or ""
       end
+    end
 
-      run_git(vim.list_extend(vim.deepcopy(diff_args), { "--numstat", "HEAD", "--" }), root, function(numstat_result)
-        if not is_latest() then return end
-        run_git({ "ls-files", "--others", "--exclude-standard", "-z" }, root, function(untracked_result)
-          if not is_latest() then return end
-          if untracked_result.code ~= 0 then
-            return show_message(review, { "Could not list untracked files.", vim.trim(untracked_result.stderr or "") })
-          end
-
-          local files, by_path = parse_name_status(status_result.stdout or "")
-          apply_numstat(by_path, numstat_result.stdout or "")
-          for path in vim.gsplit(untracked_result.stdout or "", "\0", { plain = true, trimempty = true }) do
-            if not by_path[path] then
-              local file = { path = path, status = "?", additions = 0, deletions = 0 }
-              add_untracked_stats(file, root)
-              files[#files + 1] = file
-            end
-          end
-
-          review.snapshots = review.snapshots or {}
-          for _, file in ipairs(files) do
-            if review.snapshots[file.path] == nil then
-              review.snapshots[file.path] = read_file(root .. "/" .. file.path) or ""
-            end
-          end
-
-          review.entries, review.files = build_entries(files)
-          if #review.files == 0 then
-            review.index = nil
-            render_panel(review)
-            return show_message(review, { "No uncommitted changes against HEAD." })
-          end
-          local index = 1
-          for i, file in ipairs(review.files) do
-            if file.path == selected_path then index = i; break end
-          end
-          load_file(review, index)
-        end)
-      end)
-    end)
+    review.entries, review.files = build_entries(files)
+    if #review.files == 0 then
+      review.index = nil
+      render_panel(review)
+      return show_message(review, { "No changes in the current unit." })
+    end
+    local index = 1
+    for i, file in ipairs(review.files) do
+      if file.path == selected_path then index = i; break end
+    end
+    load_file(review, index)
   end)
 end
 
@@ -976,7 +1042,7 @@ local function create_review(tabpage, win, opts)
     callback = function() models[buf] = nil end,
   })
 
-  if opts and opts.panel_open == true then
+  if not opts or opts.panel_open ~= false then
     open_panel(review)
   end
   show_message(review, { "Loading changes…" })
@@ -1002,7 +1068,7 @@ function M.statuscolumn()
   elseif info.old and info.kind ~= "context" then
     sign, group = "-", "AgentChangesPanelDeletions"
   end
-  local marker = sign == " " and "  " or sign .. (info.hunk == model.latest_hunk and sign or " ")
+  local marker = sign == " " and "  " or sign .. " "
   return ("%%C%%#LineNr#%s %s %%#%s#%s%%* "):format(number(info.old), number(info.new), group, marker)
 end
 
@@ -1026,25 +1092,15 @@ local function agent_file_changed(args)
       local current_text = read_file(absolute) or ""
 
       local previous_text = review.snapshots and review.snapshots[path]
+      if previous_text == nil then
+        -- The file had no change in this unit yet; its prior state is the baseline.
+        previous_text = baseline_text(root, path) or ""
+      end
       if previous_text == current_text then goto continue end
       review.snapshots = review.snapshots or {}
       review.snapshots[path] = current_text
-      review.edit_sequence = (review.edit_sequence or 0) + 1
-      local sequence = review.edit_sequence
-      local function record_edit(old_text)
-        if not is_current_review(review) or review.edit_sequence ~= sequence then return end
-        review.latest_edit = { path = path, old_text = old_text, new_text = current_text }
-        refresh(review)
-      end
-      if previous_text ~= nil then
-        record_edit(previous_text)
-      else
-        -- The review may have opened before this file had any working-tree diff.
-        -- Seed its first agent edit from HEAD (or empty text for a new file).
-        run_git({ "cat-file", "-p", "HEAD:" .. path }, root, function(result)
-          record_edit(result.code == 0 and (result.stdout or "") or "")
-        end, true)
-      end
+      review.latest_edit = { path = path, old_text = previous_text, new_text = current_text }
+      refresh(review)
     end
     ::continue::
   end
@@ -1078,11 +1134,21 @@ function M.open_current_file()
   end
 
   local path = review.root .. "/" .. file.path
+  local model = models[review.buf]
+  local cursor = api.nvim_win_get_cursor(review.win)
+  local view = api.nvim_win_call(review.win, vim.fn.winsaveview)
+  local info = model and model.rows[cursor[1]] or {}
+  local line, exact
+  if model then line, exact = file_position(model, cursor[1]) end
+
   resume_bookmarks[vim.fs.normalize(path)] = {
     tabpage = review.tabpage,
     win = review.win,
     selected_path = file.path,
-    cursor = api.nvim_win_get_cursor(review.win),
+    cursor = cursor,
+    topline = view.topline,
+    old = info.old,
+    new = info.new,
     panel_open = review.panel ~= nil and api.nvim_win_is_valid(review.panel.win),
   }
   close_review(review)
@@ -1093,6 +1159,14 @@ function M.open_current_file()
     api.nvim_set_current_win(target)
   end
   vim.cmd("edit " .. vim.fn.fnameescape(path))
+
+  if line then
+    line = math.min(line, api.nvim_buf_line_count(0))
+    local text = api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
+    local col = math.min(exact and cursor[2] or 0, #text)
+    pcall(api.nvim_win_set_cursor, 0, { line, col })
+    vim.cmd("normal! zvzz")
+  end
   return true
 end
 
@@ -1103,6 +1177,23 @@ function M.current_file_path()
   end
   return review.root .. "/" .. file.path
 end
+
+function M.start_unit()
+  local root = git_result({ "rev-parse", "--show-toplevel" }, vim.fn.getcwd())
+  if not root then return false end
+  root = vim.fs.normalize(vim.trim(root))
+  if not capture_unit_baseline(root) then return false end
+  for _, review in pairs(reviews) do
+    if review.root and vim.fs.normalize(review.root) == root then
+      review.snapshots, review.latest_edit, review.resume_bookmark = nil, nil, nil
+      if is_current_review(review) then refresh(review) end
+    end
+  end
+  return true
+end
+
+-- Test hooks.
+M._collect_unit_files = collect_unit_files
 
 function M.toggle()
   local tabpage = api.nvim_get_current_tabpage()

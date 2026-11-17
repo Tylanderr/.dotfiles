@@ -12,6 +12,7 @@ return {
     local session_runtime = require("opencode.services.session_runtime")
     local agent_model = require("opencode.services.agent_model")
     local config_file = require("opencode.config_file")
+    local nvim_opencode_config = vim.fs.joinpath(vim.fn.stdpath("config"), "opencode-nvim.json")
 
     local nvim_agents = {
       coworker = true,
@@ -29,7 +30,11 @@ return {
     local apply_server_agent = agent_model.apply_server_agent
     agent_model.apply_server_agent = function(agent)
       if nvim_agents[agent] then
+        local was_cobuild = require("opencode.state").store.get("current_mode") == "cobuild"
         apply_server_agent(agent)
+        if agent == "cobuild" and not was_cobuild then
+          require("utils.changes").start_unit()
+        end
       end
     end
 
@@ -51,6 +56,72 @@ return {
         variant = "xhigh",
       },
     }
+
+    local cobuild_approval_questions = {}
+
+    local function contains_approve(value)
+      if value == "Approve" then return true end
+      if type(value) == "table" then
+        for _, item in pairs(value) do
+          if contains_approve(item) then return true end
+        end
+      end
+      return false
+    end
+
+    local function question_id(properties)
+      local form = properties.form or properties
+      return properties.id or properties.requestID or properties.requestId or form.id
+    end
+
+    local function has_cobuild_approval_header(properties)
+      for _, question in ipairs(properties.questions or {}) do
+        if question.header == "CoBuild approval" then return true end
+      end
+      local form = properties.form or properties
+      if form.title == "CoBuild approval" then return true end
+      for _, field in ipairs(form.fields or {}) do
+        if field.title == "CoBuild approval" then return true end
+      end
+      return false
+    end
+
+    local function track_cobuild_approval(args)
+      local event = args.data and args.data.event
+      local properties = event and event.properties or {}
+      local event_type = event and event.type
+      local id = question_id(properties)
+      if event_type == "question.asked" or event_type == "form.created" then
+        local state = require("opencode.state")
+        if state.store.get("current_mode") == "cobuild" and has_cobuild_approval_header(properties) and id then
+          cobuild_approval_questions[id] = true
+        end
+      elseif event_type == "question.replied" or event_type == "form.replied" then
+        local request_id = event_type == "question.replied" and (properties.requestID or properties.requestId) or id
+        if request_id and cobuild_approval_questions[request_id] then
+          cobuild_approval_questions[request_id] = nil
+          local form = properties.form or properties
+          if contains_approve(properties.answers or properties.answer or form.answer) then
+            require("utils.changes").start_unit()
+          end
+        end
+      elseif event_type == "question.rejected" or event_type == "form.cancelled" then
+        if id then cobuild_approval_questions[id] = nil end
+      end
+    end
+
+    api.nvim_create_autocmd("User", {
+      pattern = {
+        "OpencodeEvent:question.asked",
+        "OpencodeEvent:question.replied",
+        "OpencodeEvent:question.rejected",
+        "OpencodeEvent:form.created",
+        "OpencodeEvent:form.replied",
+        "OpencodeEvent:form.cancelled",
+      },
+      group = api.nvim_create_augroup("CoBuildUnitApproval", { clear = true }),
+      callback = track_cobuild_approval,
+    })
 
     local function async(callback)
       Promise.async(callback)()
@@ -75,11 +146,20 @@ return {
         local profile = mode_profiles[next_mode]
         agent_model.set_model(profile.provider, profile.model)
         agent_model.set_variant(profile.variant)
+        if next_mode == "cobuild" then
+          require("utils.changes").start_unit()
+        end
       end)
     end
 
     local function switch_to_coworker()
-      agent_model.switch_to_mode("coworker"):await()
+      if not agent_model.switch_to_mode("coworker"):await() then
+        return
+      end
+
+      local profile = mode_profiles.coworker
+      agent_model.set_model(profile.provider, profile.model)
+      agent_model.set_variant(profile.variant)
     end
 
     local function add_visual_selection_inline()
@@ -93,7 +173,7 @@ return {
       local end_pos = fn.getpos(".")
       local first_pos, last_pos = start_pos, end_pos
       if first_pos[2] > last_pos[2]
-        or (first_pos[2] == last_pos[2] and first_pos[3] > last_pos[3])
+          or (first_pos[2] == last_pos[2] and first_pos[3] > last_pos[3])
       then
         first_pos, last_pos = last_pos, first_pos
       end
@@ -408,6 +488,33 @@ return {
       default_system_prompt = nil,
       keymap_prefix = "<leader>o",
       opencode_executable = "opencode",
+      server = {
+        -- Use a dedicated process with the Neovim-only agent profile rather
+        -- than attaching to OpenCode's shared native service.
+        url = "http://127.0.0.1",
+        port = 47631,
+        password_file = vim.fn.stdpath("state") .. "/opencode/v1-47631.password",
+        spawn_command = function(port, url, env)
+          local server_env = vim.tbl_extend("force", env or {}, {
+            OPENCODE_CONFIG = nvim_opencode_config,
+          })
+          local job_id = fn.jobstart({
+            "opencode",
+            "serve",
+            "--port",
+            tostring(port),
+            "--hostname",
+            "127.0.0.1",
+          }, {
+            detach = true,
+            env = server_env,
+          })
+          if job_id <= 0 then
+            error("failed to start Neovim OpenCode server (jobstart returned " .. job_id .. ")")
+          end
+          return fn.jobpid(job_id)
+        end,
+      },
 
       context = {
         current_file = {

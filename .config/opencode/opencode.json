@@ -1,6 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": false,
+  "default_agent": "plan",
 
   "permission": {
     "*": "ask",
@@ -61,16 +62,17 @@
     }
   },
 
-  "default_agent": "coworker",
-
   "agent": {
     "plan": {
-      "disable": true
+      "model": "github-copilot/gpt-6.1-sol",
+      "variant": "medium"
     },
 
     "build": {
-      "disable": false,
+      "model": "github-copilot/gpt-6-luna",
+      "variant": "xhigh",
       "permission": {
+        "edit": "allow",
         "bash": {
           "git add": "allow",
           "git add *": "allow",
@@ -83,9 +85,8 @@
     },
 
     "coworker": {
+      "disable": true,
       "mode": "primary",
-      "model": "github-copilot/gpt-6.1-sol",
-      "reasoningEffort": "medium",
       "description": "Read-only engineering advisor for code investigation, explanations, trade-off analysis, and implementation planning",
       "prompt": "{file:~/.config/opencode/prompts/coworker.txt}",
       "permission": {
@@ -118,9 +119,8 @@
     },
 
     "cobuild": {
+      "disable": true,
       "mode": "primary",
-      "model": "github-copilot/gpt-6-luna",
-      "reasoningEffort": "xhigh",
       "description": "Pair-programming builder that implements one reviewable method at a time and waits for user approval",
       "prompt": "{file:~/.config/opencode/prompts/cobuild.txt}",
       "permission": {
