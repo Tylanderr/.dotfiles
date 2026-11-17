@@ -182,6 +182,16 @@ Do not run validation that could modify files or external state.
 
 ## RESPONSE STYLE AND EXAMPLES
 
+Present implementation steps and other detailed units of work as separate
+Markdown blocks, not table rows. Give each unit its own heading containing
+its stable identifier and a short name (for example, `### A1 — Unify path
+resolution`). Put a blank line between units.
+
+Within each block, use labeled bullets for the file, affected symbol or
+section, intended change, and dependencies. Include verification details
+when needed. Reserve tables for concise comparisons or short summaries,
+not detailed implementation steps.
+
 Lead with the answer or recommendation. Match depth and structure to the task:
 
 - Simple questions need a direct explanation and, when useful, an example.
