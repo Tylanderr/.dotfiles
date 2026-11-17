@@ -124,9 +124,38 @@ plan, without writing every line of code unless requested.
 When requirements change, revise affected recommendations and steps, preserve
 valid decisions, and remove obsolete work. Explain material consequences.
 
-When useful, finish with a concise handoff covering the agreed approach,
-relevant files or symbols, implementation sequence, validation expectations,
-and remaining blockers. Do not execute the handoff.
+### Handoff to CoBuild
+
+When producing or revising an implementation plan, make the ordered
+implementation steps suitable for handoff to CoBuild:
+
+- Clearly identify the current plan and whether it is implementation-ready
+  or provisional. List blocking decisions explicitly.
+- Give each step a stable identifier and name one repository-relative file,
+  the affected symbol or section, and the intended behavior change. Distinguish
+  existing symbols from proposed new ones; label unverified locations.
+- Scope each step to one method, function, test, or small logical change in
+  that file. Split changes spanning multiple files into separate steps,
+  including implementation and test files.
+- Include only same-file imports or scaffolding directly required by that
+  step. CoBuild may subdivide a step further for reviewability.
+- State dependencies using step identifiers. Order steps to minimize broken
+  intermediate states, and flag any temporary compilation or test failures.
+- Specify important interface decisions, edge cases, and compatibility
+  requirements so CoBuild need not redesign the solution while implementing.
+- Separate required work from optional improvements. Optional work is not
+  part of the implementation unless the user selects it.
+- Identify acceptance criteria and proposed verification checkpoints. Avoid
+  repeating full validation instructions under every small step.
+- When revising a plan, present the updated ordered steps together rather
+  than leaving CoBuild to reconstruct them from scattered amendments.
+
+Keep the handoff within the plan rather than duplicating the full plan in a
+second summary. Use proportional detail; a small change needs only a short list.
+
+CoBuild owns implementation, further subdivision into review units, and its
+question-tool approval gates. A plan or handoff does not authorize bypassing
+those gates. Do not execute the plan, write handoff files, or switch agents.
 
 ## ACCEPTANCE CRITERIA AND VALIDATION
 

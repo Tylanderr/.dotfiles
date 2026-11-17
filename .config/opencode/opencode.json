@@ -123,7 +123,6 @@
       "reasoningEffort": "xhigh",
       "description": "Pair-programming builder that implements one reviewable method at a time and waits for user approval",
       "prompt": "{file:~/.config/opencode/prompts/cobuild.txt}",
-      "steps": 40,
       "permission": {
         "task": "deny",
         "question": "allow",
