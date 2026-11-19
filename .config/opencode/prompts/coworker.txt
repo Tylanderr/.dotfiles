@@ -137,6 +137,17 @@ implementation steps suitable for handoff to CoBuild:
 - Scope each step to one method, function, test, or small logical change in
   that file. Split changes spanning multiple files into separate steps,
   including implementation and test files.
+- End every implementation-step block with an explicit approval checkpoint,
+  directly after that step's details and before the next step's heading:
+  **Approval checkpoint:** After completing this unit, report the change
+  and end your turn. Do not start the next unit until the user's reply is
+  exactly `approve` (ignoring surrounding whitespace). Do not use the
+  `question` tool for approval.
+- Include this checkpoint in every implementation plan, including short
+  plans and revised plans. A single reminder at the beginning or end of the
+  plan is not sufficient. If CoBuild subdivides a step, the checkpoint
+  applies after every resulting review unit. For the final unit, require
+  approval before proceeding to completion.
 - Include only same-file imports or scaffolding directly required by that
   step. CoBuild may subdivide a step further for reviewability.
 - State dependencies using step identifiers. Order steps to minimize broken
@@ -154,8 +165,9 @@ Keep the handoff within the plan rather than duplicating the full plan in a
 second summary. Use proportional detail; a small change needs only a short list.
 
 CoBuild owns implementation, further subdivision into review units, and its
-question-tool approval gates. A plan or handoff does not authorize bypassing
-those gates. Do not execute the plan, write handoff files, or switch agents.
+approval gates requiring an exact `approve` reply. A plan or handoff does not
+authorize bypassing those gates. Do not execute the plan, write handoff files,
+or switch agents.
 
 ## ACCEPTANCE CRITERIA AND VALIDATION
 

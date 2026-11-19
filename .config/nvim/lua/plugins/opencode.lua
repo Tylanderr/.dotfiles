@@ -27,14 +27,21 @@ return {
       end, agents)
     end)
 
+    local messaging = require("opencode.services.messaging")
+    local send_message = messaging.send_message
+    messaging.send_message = function(prompt, opts)
+      if require("opencode.state").store.get("current_mode") == "cobuild"
+          and type(prompt) == "string"
+          and vim.trim(prompt) == "approve" then
+        require("utils.changes").start_unit()
+      end
+      return send_message(prompt, opts)
+    end
+
     local apply_server_agent = agent_model.apply_server_agent
     agent_model.apply_server_agent = function(agent)
       if nvim_agents[agent] then
-        local was_cobuild = require("opencode.state").store.get("current_mode") == "cobuild"
         apply_server_agent(agent)
-        if agent == "cobuild" and not was_cobuild then
-          require("utils.changes").start_unit()
-        end
       end
     end
 
@@ -56,72 +63,6 @@ return {
         variant = "xhigh",
       },
     }
-
-    local cobuild_approval_questions = {}
-
-    local function contains_approve(value)
-      if value == "Approve" then return true end
-      if type(value) == "table" then
-        for _, item in pairs(value) do
-          if contains_approve(item) then return true end
-        end
-      end
-      return false
-    end
-
-    local function question_id(properties)
-      local form = properties.form or properties
-      return properties.id or properties.requestID or properties.requestId or form.id
-    end
-
-    local function has_cobuild_approval_header(properties)
-      for _, question in ipairs(properties.questions or {}) do
-        if question.header == "CoBuild approval" then return true end
-      end
-      local form = properties.form or properties
-      if form.title == "CoBuild approval" then return true end
-      for _, field in ipairs(form.fields or {}) do
-        if field.title == "CoBuild approval" then return true end
-      end
-      return false
-    end
-
-    local function track_cobuild_approval(args)
-      local event = args.data and args.data.event
-      local properties = event and event.properties or {}
-      local event_type = event and event.type
-      local id = question_id(properties)
-      if event_type == "question.asked" or event_type == "form.created" then
-        local state = require("opencode.state")
-        if state.store.get("current_mode") == "cobuild" and has_cobuild_approval_header(properties) and id then
-          cobuild_approval_questions[id] = true
-        end
-      elseif event_type == "question.replied" or event_type == "form.replied" then
-        local request_id = event_type == "question.replied" and (properties.requestID or properties.requestId) or id
-        if request_id and cobuild_approval_questions[request_id] then
-          cobuild_approval_questions[request_id] = nil
-          local form = properties.form or properties
-          if contains_approve(properties.answers or properties.answer or form.answer) then
-            require("utils.changes").start_unit()
-          end
-        end
-      elseif event_type == "question.rejected" or event_type == "form.cancelled" then
-        if id then cobuild_approval_questions[id] = nil end
-      end
-    end
-
-    api.nvim_create_autocmd("User", {
-      pattern = {
-        "OpencodeEvent:question.asked",
-        "OpencodeEvent:question.replied",
-        "OpencodeEvent:question.rejected",
-        "OpencodeEvent:form.created",
-        "OpencodeEvent:form.replied",
-        "OpencodeEvent:form.cancelled",
-      },
-      group = api.nvim_create_augroup("CoBuildUnitApproval", { clear = true }),
-      callback = track_cobuild_approval,
-    })
 
     local function async(callback)
       Promise.async(callback)()
@@ -146,9 +87,6 @@ return {
         local profile = mode_profiles[next_mode]
         agent_model.set_model(profile.provider, profile.model)
         agent_model.set_variant(profile.variant)
-        if next_mode == "cobuild" then
-          require("utils.changes").start_unit()
-        end
       end)
     end
 
@@ -289,14 +227,13 @@ return {
     end
 
     local function approve_step()
-      local win = api.nvim_get_current_win()
-      local cursor = api.nvim_win_get_cursor(win)
-      require("opencode.api").question_answer()
-      vim.schedule(function()
-        if api.nvim_win_is_valid(win) then
-          api.nvim_set_current_win(win)
-          api.nvim_win_set_cursor(win, cursor)
-        end
+      if not require("opencode.state").session.active_observation() then
+        vim.notify("No active OpenCode session to approve", vim.log.levels.WARN)
+        return
+      end
+
+      messaging.send_message("approve"):catch(function(err)
+        vim.notify("OpenCode approval: " .. tostring(err), vim.log.levels.ERROR)
       end)
     end
 
@@ -522,7 +459,10 @@ return {
         },
         diagnostics = {
           enabled = true,
-        }
+        },
+        selection = {
+          enabled = false,
+        },
       },
 
       keymap = {
@@ -533,7 +473,7 @@ return {
           ["<leader>av"] = { add_visual_selection_inline, mode = { "v" }, desc = "Insert selection into OpenCode input", },
           ["<leader>af"] = { add_current_file, mode = { "n" } },
           ["<leader>oi"] = { open_input, mode = { "n" } },
-          ["<leader>oa"] = { approve_step, mode = { "n" }, desc = "Approve the current OpenCode question", },
+          ["<leader>oa"] = { approve_step, mode = { "n" }, desc = "Approve the current CoBuild unit", },
           ["<leader>oo"] = { open_output, mode = { "n" }, desc = "Open and refresh OpenCode output", },
           ["<leader>ox"] = { unload_attachments },
           ["<leader>on"] = { start_new_session },

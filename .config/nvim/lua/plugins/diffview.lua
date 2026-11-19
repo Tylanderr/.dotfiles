@@ -33,6 +33,7 @@ return {
     { "<c-u>", function() require("diffview.actions").scroll_view(-0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view up", },
     { "<c-d>", function() require("diffview.actions").scroll_view(0.25)() end, ft = { "DiffviewFiles", "DiffviewFileHistory" }, desc = "Scroll the view down", },
     { "<leader>gdu", function() require("utils.changes").toggle() end, desc = "Toggle left-pane unified diff of the current agent unit", },
+    { "<leader>gdr", function() require("utils.changes").start_unit() end, desc = "Reset current unit diff", },
 
     { "<leader>gdm", function()
         local lib = require("diffview.lib")

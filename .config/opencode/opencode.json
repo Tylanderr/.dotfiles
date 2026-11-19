@@ -65,7 +65,10 @@
   "agent": {
     "plan": {
       "model": "github-copilot/gpt-6.1-sol",
-      "variant": "medium"
+      "variant": "medium",
+      "permission": {
+        "task": "allow"
+      }
     },
 
     "build": {
@@ -73,6 +76,7 @@
       "variant": "xhigh",
       "permission": {
         "edit": "allow",
+        "task": "allow",
         "bash": {
           "git add": "allow",
           "git add *": "allow",
@@ -129,7 +133,7 @@
       "prompt": "{file:~/.config/opencode/prompts/cobuild.txt}",
       "permission": {
         "task": "deny",
-        "question": "allow",
+        "question": "deny",
         "edit": {
           "*": "allow",
           "../*": "deny",
@@ -159,6 +163,8 @@
           "git rev-parse *": "allow",
           "mvn test": "allow",
           "mvn test *": "allow",
+          "mvn -Dtest=* test": "allow",
+          "mvn -Dtest=* test *": "allow",
           "npm test": "allow",
           "npm test *": "allow",
           "rg *--pre*": "deny",

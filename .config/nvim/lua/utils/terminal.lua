@@ -27,26 +27,12 @@ local function setup_term_keymaps(buf)
     nowait = true,
     desc = "Interrupt; press twice for terminal-normal mode",
   })
-
-  vim.keymap.set("n", "i", "i", { buffer = buf })
-  vim.keymap.set("n", "a", "a", { buffer = buf })
-end
-
-local function ensure_terminal(buf)
-  vim.api.nvim_buf_call(buf, function()
-    vim.fn.jobstart(vim.o.shell, {
-      term = true,
-    })
-  end)
-
-  setup_term_keymaps(buf)
 end
 
 local function toggle_left_terminal()
   -- Restore the previous buffer when the terminal is already open.
   if left_term_win
       and vim.api.nvim_win_is_valid(left_term_win)
-      and left_term_buf
       and vim.api.nvim_win_get_buf(left_term_win) == left_term_buf then
     vim.api.nvim_set_current_win(left_term_win)
 
@@ -69,7 +55,10 @@ local function toggle_left_terminal()
   if not left_term_buf or not vim.api.nvim_buf_is_valid(left_term_buf) then
     left_term_buf = vim.api.nvim_create_buf(false, true)
     vim.bo[left_term_buf].bufhidden = "hide"
-    ensure_terminal(left_term_buf)
+    vim.api.nvim_buf_call(left_term_buf, function()
+      vim.fn.jobstart(vim.o.shell, { term = true })
+    end)
+    setup_term_keymaps(left_term_buf)
   end
 
   left_previous_buf = vim.api.nvim_win_get_buf(target)
@@ -80,27 +69,17 @@ local function toggle_left_terminal()
   vim.cmd("startinsert")
 end
 
-local function toggle_left_terminal_from_terminal_mode()
-  local escape = vim.api.nvim_replace_termcodes(
-    "<C-\\><C-n>",
-    true,
-    false,
-    true
-  )
-
-  vim.api.nvim_feedkeys(escape, "n", false)
-  vim.schedule(toggle_left_terminal)
-end
-
 -- Ctrl+T in normal mode.
 vim.keymap.set("n", "<C-t>", toggle_left_terminal, {
   desc = "Toggle left-pane terminal",
 })
 
 -- Ctrl+T while inside the terminal.
-vim.keymap.set("t", "<C-t>", toggle_left_terminal_from_terminal_mode, {
+vim.keymap.set("t", "<C-t>", function()
+  vim.schedule(toggle_left_terminal)
+  return "<C-\\><C-n>"
+end, {
+  expr = true,
   desc = "Toggle left-pane terminal",
   nowait = true,
 })
-
-return {}

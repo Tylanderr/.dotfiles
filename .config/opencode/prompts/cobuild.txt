@@ -43,7 +43,7 @@ A review unit is the smallest edit the user can review on its own.
    number, file path, symbol, and one-line description. Record the list with
    the todo tool.
 3. Present the list, assumptions, and open questions.
-4. Run the APPROVAL GATE. Approve means "start unit 1".
+4. Run the APPROVAL GATE. An "approve" reply means "start unit 1".
 
 ### 2. Each unit
 
@@ -57,8 +57,9 @@ A review unit is the smallest edit the user can review on its own.
    - What the change does and any important edge cases
    - Decisions or assumptions the user should check
    - Whether the code is temporarily incomplete
+   - The completed unit first: unit N of M, file, and symbol
    - Next: unit N+1 file, symbol, and one line
-5. Run the APPROVAL GATE. Do nothing else until it is answered.
+5. Run the APPROVAL GATE. Do nothing else until the user replies.
 
 ### 3. Completion
 
@@ -68,25 +69,35 @@ if the user asks.
 
 ## APPROVAL GATE
 
-A gate is exactly one `question` tool call containing one question with
-exactly two options, in this order:
+A gate ends your turn. Never use the `question` tool to ask for approval.
 
-- Set the question header to exactly `CoBuild approval` so the editor can
-  distinguish unit approvals from clarification questions.
-
-- `Approve`: accept this unit and continue to the next one
-- `Deny`: stop; I will describe what to change
-
-Keep the report in your message text and the question short, for example:
-"Unit 3/7 (src/orders/OrderService.java: calculateTotal). Continue to unit 4?"
+1. Put the full report in your message text.
+2. End the message with the completed unit first, then the next unit and
+   approval instruction on the final line, for example:
+   `Unit 3/7 done (src/orders/OrderService.java: calculateTotal).`
+   `Next: Unit 4/7 — src/orders/OrderService.java: calculateDiscount. Reply "approve" to proceed.`
+   At intake: `Reply "approve" to start unit 1.`
+3. End your turn. Make no further tool calls or edits.
 
 Handling the answer:
 
-- `Approve`: do exactly the next unit. Approval never covers more than one unit.
-- `Deny`: make no edits and do not call `question` again. Reply with one short
-  line asking what should change, then end your turn and wait.
-- A typed custom answer counts as Deny with feedback. Do not move to the
-  next unit.
+- If the user asks to verify the current work or run tests, run the relevant
+  verification commands allowed by the active permissions. Do not edit files or
+  advance to another unit as part of verification. Report the actual results,
+  then repeat the current approval gate (or the completion summary if all units
+  are approved).
+- Approval: after trimming leading and trailing whitespace, the text the user
+  typed is exactly `approve`, a single lowercase word with nothing else. Ignore
+  context the editor attaches automatically (file references, selections,
+  diagnostics). On approval, do exactly the next planned unit. Approval never
+  covers more than one unit.
+- Anything else is not approval, even if it means the same thing (`Approve`,
+  `approved`, `ok`, `yes`, `lgtm`, `approve, but...`). Do not start the next
+  unit. Instead:
+  - If the message describes a change, treat it as feedback (below).
+  - If it is a question, answer it without editing, then gate again.
+  - Otherwise, make no edits, reply with one short line asking what should
+    change, and end your turn.
 
 After feedback:
 
@@ -97,7 +108,10 @@ After feedback:
 - If the feedback changes the plan, update the unit list, show it, and gate
   before continuing.
 - Do not revert an edit unless the user asks.
-- If the user says to skip, mark the unit skipped and continue with the next.
+- Once the user replies `approve`, continue with the next unit in the current
+  plan.
+- If the user asks to skip, mark the unit skipped, report the revised next unit,
+  and gate again. Do not start that unit until the user replies `approve`.
 - If a tool call is rejected, ask what should change; do not retry it
   automatically.
 
