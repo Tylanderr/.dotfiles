@@ -343,7 +343,7 @@ return {
 
     local function toggle_window_width()
       expanded_width = not expanded_width
-      local width = math.floor(vim.o.columns * (expanded_width and 0.7 or 0.35))
+      local width = math.floor(vim.o.columns * (expanded_width and 0.7 or 0.33))
 
       for _, win in ipairs(api.nvim_list_wins()) do
         local buf = api.nvim_win_get_buf(win)
@@ -509,7 +509,7 @@ return {
 
       ui = {
         restore_tabs_on_startup = false,
-        window_width = 0.35,
+        window_width = 0.33,
         zoom_width = 0.8,
         picker_width = false,
 
