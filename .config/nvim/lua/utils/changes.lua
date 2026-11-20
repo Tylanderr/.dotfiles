@@ -12,14 +12,12 @@ local namespaces = {
 
 local panel_width = 30
 local max_syntax_bytes = 1024 * 1024
-local max_inline_bytes = 4000
 local file_context = 6
 local icons = { fold_open = "\u{f47c}", folder_open = "\u{e5fe}" }
 local diff_options = {
   result_type = "indices",
-  algorithm = "histogram",
+  algorithm = "myers",
   indent_heuristic = true,
-  linematch = 60,
 }
 local review_window_settings = {
   { "foldmethod", "manual" },
@@ -45,8 +43,6 @@ local function setup_highlights()
 
   link("AgentChangesAdd", "DiffAdd")
   link("AgentChangesDelete", "DiffDelete")
-  link("AgentChangesChange", "DiffChange")
-  link("AgentChangesText", "DiffText")
   local title = api.nvim_get_hl(0, { name = "Label", link = false })
   title.bold, title.default = true, true
   api.nvim_set_hl(0, "AgentChangesPanelTitle", title)
@@ -82,8 +78,6 @@ local status_highlights = {
 local row_highlights = {
   add = "AgentChangesAdd",
   delete = "AgentChangesDelete",
-  change_old = "AgentChangesChange",
-  change_new = "AgentChangesChange",
 }
 
 local function leftmost_non_opencode_window(tabpage)
@@ -245,21 +239,15 @@ local function build_model(old_text, new_text)
     old_start, new_start = diff_starts(old_start, old_count, new_start, new_count)
     append_context_until(old_start)
 
-    local paired = math.min(old_count, new_count)
-    local first_old_row = #model.lines + 1
     for i = 0, old_count - 1 do
       push(old_lines[old_start + i], {
-        kind = i < paired and "change_old" or "delete",
+        kind = "delete",
         old = old_start + i,
         hunk = hunk_index,
       })
     end
     for i = 0, new_count - 1 do
-      local info = { kind = i < paired and "change_new" or "add", new = new_start + i, hunk = hunk_index }
-      if i < paired then
-        info.pair = first_old_row + i
-      end
-      push(new_lines[new_start + i], info)
+      push(new_lines[new_start + i], { kind = "add", new = new_start + i, hunk = hunk_index })
     end
     old_i, new_i = old_start + old_count, new_start + new_count
   end
@@ -425,7 +413,7 @@ local function collect_unit_files(root)
       if looks_binary(before) or looks_binary(after) then
         file.binary = true
       else
-        local hunks = vim.text.diff(file.old_text, after or "", { result_type = "indices" })
+        local hunks = vim.text.diff(file.old_text, after or "", diff_options)
         for _, hunk in ipairs(hunks or {}) do
           file.deletions = file.deletions + hunk[2]
           file.additions = file.additions + hunk[4]
@@ -435,50 +423,6 @@ local function collect_unit_files(root)
     end
   end
   return files
-end
-
-local function split_characters(text)
-  local chars, offsets = {}, { 0 }
-  for char in text:gmatch("[%z\1-\127\192-\255][\128-\191]*") do
-    chars[#chars + 1] = char
-    offsets[#offsets + 1] = offsets[#offsets] + #char
-  end
-  return chars, offsets
-end
-
-local function simple_inline_ranges(old, new)
-  local prefix = 0
-  while prefix < #old and prefix < #new and old:byte(prefix + 1) == new:byte(prefix + 1) do
-    prefix = prefix + 1
-  end
-  local suffix = 0
-  while suffix < #old - prefix and suffix < #new - prefix
-    and old:byte(#old - suffix) == new:byte(#new - suffix)
-  do
-    suffix = suffix + 1
-  end
-  return { { prefix, #old - suffix } }, { { prefix, #new - suffix } }
-end
-
-local function inline_ranges(old, new)
-  if old == "" or new == "" or #old + #new > max_inline_bytes then
-    return simple_inline_ranges(old, new)
-  end
-  local old_chars, old_offsets = split_characters(old)
-  local new_chars, new_offsets = split_characters(new)
-  local old_text = table.concat(old_chars, "\n") .. "\n"
-  local new_text = table.concat(new_chars, "\n") .. "\n"
-  local hunks = vim.text.diff(old_text, new_text, { result_type = "indices" })
-  local old_ranges, new_ranges = {}, {}
-  for _, hunk in ipairs(hunks or {}) do
-    if hunk[2] > 0 then
-      old_ranges[#old_ranges + 1] = { old_offsets[hunk[1]], old_offsets[hunk[1] + hunk[2]] }
-    end
-    if hunk[4] > 0 then
-      new_ranges[#new_ranges + 1] = { new_offsets[hunk[3]], new_offsets[hunk[3] + hunk[4]] }
-    end
-  end
-  return old_ranges, new_ranges
 end
 
 local function apply_syntax(buf, model, path)
@@ -545,18 +489,6 @@ local function render_diff(review, model, file, preserve_cursor, target_row)
     local group = row_highlights[info.kind]
     if group then
       api.nvim_buf_set_extmark(buf, namespaces.diff, row - 1, 0, { line_hl_group = group })
-    end
-    if info.kind == "change_new" and info.pair then
-      local old_ranges, new_ranges = inline_ranges(model.lines[info.pair], model.lines[row])
-      for _, target in ipairs({ { row = info.pair - 1, ranges = old_ranges }, { row = row - 1, ranges = new_ranges } }) do
-        for _, range in ipairs(target.ranges) do
-          if range[2] > range[1] then
-            api.nvim_buf_set_extmark(buf, namespaces.diff, target.row, range[1], {
-              end_col = range[2], hl_group = "AgentChangesText", priority = 200,
-            })
-          end
-        end
-      end
     end
   end
 

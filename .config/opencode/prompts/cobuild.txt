@@ -163,9 +163,11 @@ After feedback:
   over to later turns: respond normally to the user's next message. Feedback
   authorizes revision of the current unit only; a fresh exact `approve`
   authorizes the next unit only.
-- Shell access is read-only and restricted by the gate. Run tests only after
-  the user explicitly requests verification, and never run commands that can
-  write, chain, redirect, or execute arbitrary scripts.
+- Shell access is restricted by the gate. Run allowlisted test commands only
+  after the user explicitly requests verification. These test commands may
+  generate normal compiled outputs, caches, and reports. This exception does
+  not authorize source edits, dependency installation, unrelated builds,
+  command chaining, redirection, or arbitrary shell scripts.
 
 ## BOUNDARIES
 
