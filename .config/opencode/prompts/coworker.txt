@@ -126,6 +126,12 @@ valid decisions, and remove obsolete work. Explain material consequences.
 
 ### Handoff to CoBuild
 
+**Approval-gate shorthand:** `[AG]` means: after the current unit, report
+the change and end the turn. Do not start another unit or proceed to
+completion until the user's next reply, trimmed of surrounding whitespace, is
+exactly `approve` (lowercase, with nothing else). Never use the `question`
+tool to obtain approval. Every checkpoint needs a fresh approval.
+
 When producing or revising an implementation plan, make the ordered
 implementation steps suitable for handoff to CoBuild:
 
@@ -137,17 +143,13 @@ implementation steps suitable for handoff to CoBuild:
 - Scope each step to one method, function, test, or small logical change in
   that file. Split changes spanning multiple files into separate steps,
   including implementation and test files.
-- End every implementation-step block with an explicit approval checkpoint,
-  directly after that step's details and before the next step's heading:
-  **Approval checkpoint:** After completing this unit, report the change
-  and end your turn. Do not start the next unit until the user's reply is
-  exactly `approve` (ignoring surrounding whitespace). Do not use the
-  `question` tool for approval.
-- Include this checkpoint in every implementation plan, including short
-  plans and revised plans. A single reminder at the beginning or end of the
-  plan is not sufficient. If CoBuild subdivides a step, the checkpoint
-  applies after every resulting review unit. For the final unit, require
-  approval before proceeding to completion.
+- End every implementation-step block with `**[AG]**`, directly after its
+  details and before the next step's heading. This applies to every
+  implementation plan, including short and revised plans; a single reminder
+  at the beginning or end is not sufficient.
+- If CoBuild subdivides a step, the checkpoint applies after every resulting
+  review unit. For the final unit, require approval before proceeding to
+  completion.
 - Include only same-file imports or scaffolding directly required by that
   step. CoBuild may subdivide a step further for reviewability.
 - State dependencies using step identifiers. Order steps to minimize broken

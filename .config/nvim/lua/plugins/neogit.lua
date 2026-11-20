@@ -39,10 +39,27 @@ return {
   config = function()
     local windows = require("utils.windows")
 
+    local function focus_leftmost_editor(tabpage)
+      if not vim.api.nvim_tabpage_is_valid(tabpage) then
+        vim.notify("The originating tab is no longer available", vim.log.levels.WARN)
+        return false
+      end
+
+      vim.api.nvim_set_current_tabpage(tabpage)
+      local target = windows.leftmost_window(tabpage, { exclude_winfixbuf = true })
+      if target then
+        vim.api.nvim_set_current_win(target)
+      else
+        vim.cmd("topleft vsplit")
+        vim.wo.winfixbuf = false
+      end
+
+      return true
+    end
+
     vim.keymap.set("n", "<leader>gs", function()
       neogit_open_context = {
         tabpage = vim.api.nvim_get_current_tabpage(),
-        redirect = windows.is_opencode_window(vim.api.nvim_get_current_win()),
       }
       vim.cmd("Neogit kind=floating")
     end, { desc = "Neogit status" })
@@ -89,28 +106,14 @@ return {
 
           local item = instance.buffer.ui:get_item_under_cursor()
           if item and item.absolute_path then
-            -- File: close float, then open in the originating or redirected window
+            -- File: close float, then open in the far-left editable window.
             local path = item.absolute_path
             local open_context = neogit_open_context
+            local tabpage = open_context and open_context.tabpage or vim.api.nvim_get_current_tabpage()
             neogit_open_context = nil
             instance:close()
             vim.schedule(function()
-              if open_context and open_context.redirect then
-                local tabpage = open_context.tabpage
-                if not vim.api.nvim_tabpage_is_valid(tabpage) then
-                  vim.notify("The originating tab is no longer available", vim.log.levels.WARN)
-                  return
-                end
-
-                vim.api.nvim_set_current_tabpage(tabpage)
-                local target = windows.leftmost_window(tabpage)
-                if target then
-                  vim.api.nvim_set_current_win(target)
-                else
-                  vim.cmd("topleft vsplit")
-                end
-              end
-
+              if not focus_leftmost_editor(tabpage) then return end
               vim.cmd("edit " .. vim.fn.fnameescape(path))
             end)
             return
@@ -119,9 +122,12 @@ return {
           -- Commit: close float, then open commit view
           local ref = instance.buffer.ui:get_yankable_under_cursor()
           if ref then
+            local open_context = neogit_open_context
+            local tabpage = open_context and open_context.tabpage or vim.api.nvim_get_current_tabpage()
             neogit_open_context = nil
             instance:close()
             vim.schedule(function()
+              if not focus_leftmost_editor(tabpage) then return end
               require("neogit.buffers.commit_view").new(ref):open()
             end)
           end

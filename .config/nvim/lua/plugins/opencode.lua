@@ -339,13 +339,16 @@ return {
       end)
     end
 
-    local function reset_window_width()
-      local default_width = math.floor(vim.o.columns * 0.35)
+    local expanded_width = false
+
+    local function toggle_window_width()
+      expanded_width = not expanded_width
+      local width = math.floor(vim.o.columns * (expanded_width and 0.7 or 0.35))
 
       for _, win in ipairs(api.nvim_list_wins()) do
         local buf = api.nvim_win_get_buf(win)
         if opencode_filetypes[vim.bo[buf].filetype] then
-          pcall(api.nvim_win_set_width, win, default_width)
+          pcall(api.nvim_win_set_width, win, width)
         end
       end
     end
@@ -546,8 +549,8 @@ return {
           end)
     end)
 
-    vim.keymap.set("n", "<leader>ow", reset_window_width, {
-      desc = "Reset opencode window size",
+    vim.keymap.set("n", "<leader>ow", toggle_window_width, {
+      desc = "Toggle OpenCode window width",
     })
 
     -- Delete all saved opencode sessions

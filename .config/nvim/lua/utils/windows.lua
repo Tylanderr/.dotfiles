@@ -13,6 +13,7 @@ function M.leftmost_window(tabpage, opts)
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage or 0)) do
     local is_candidate = vim.api.nvim_win_get_config(win).relative == ""
       and (opts.include_opencode or not M.is_opencode_window(win))
+      and not (opts.exclude_winfixbuf and vim.wo[win].winfixbuf)
       and not (opts.exclude and opts.exclude(win))
     if is_candidate then
       local position = vim.api.nvim_win_get_position(win)
