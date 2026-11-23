@@ -172,7 +172,10 @@ return {
     end
 
     local function toggle_panel()
-      return require("opencode.api").toggle()
+      local panel = require("utils.opencode_panel")
+      return panel.toggle():catch(function(err)
+        vim.notify("OpenCode panel toggle: " .. tostring(err), vim.log.levels.ERROR)
+      end)
     end
 
     local function add_current_file()
@@ -527,6 +530,8 @@ return {
         }
       },
     })
+
+    require("utils.opencode_panel").setup()
 
     local notes_dir = vim.fs.normalize("/home/tyler/vault/obsidian-developer-vault")
 
