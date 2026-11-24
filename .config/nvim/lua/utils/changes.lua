@@ -13,7 +13,6 @@ local namespaces = {
 local panel_width = 30
 local max_syntax_bytes = 1024 * 1024
 local file_context = 6
-local icons = { fold_open = "\u{f47c}", folder_open = "\u{e5fe}" }
 local diff_options = {
   result_type = "indices",
   algorithm = "myers",
@@ -55,8 +54,6 @@ local function setup_highlights()
   link("AgentChangesPanelSelected", "Type")
   link("AgentChangesPanelInsertions", "diffAdded")
   link("AgentChangesPanelDeletions", "diffRemoved")
-  link("AgentChangesPanelFolderName", "Directory")
-  link("AgentChangesPanelFolderSign", "PreProc")
   link("AgentChangesPanelNonText", "NonText")
   link("AgentChangesPanelStatusAdded", "diffAdded")
   link("AgentChangesPanelStatusModified", "diffChanged")
@@ -114,42 +111,17 @@ local function read_file(path)
   return data
 end
 
--- Changed files and tree ------------------------------------------------------
+-- Changed files ---------------------------------------------------------------
 
 local function build_entries(files)
-  local root = { dirs = {}, files = {} }
-  for _, file in ipairs(files) do
-    local node = root
-    local parts = vim.split(file.path, "/", { plain = true })
-    for i = 1, #parts - 1 do
-      node.dirs[parts[i]] = node.dirs[parts[i]] or { name = parts[i], dirs = {}, files = {} }
-      node = node.dirs[parts[i]]
-    end
-    node.files[#node.files + 1] = file
-  end
-
   local entries, ordered = {}, {}
-  local function walk(node, depth)
-    local names = vim.tbl_keys(node.dirs)
-    table.sort(names)
-    for _, name in ipairs(names) do
-      local dir, label = node.dirs[name], name
-      while #dir.files == 0 and vim.tbl_count(dir.dirs) == 1 do
-        local _, child = next(dir.dirs)
-        dir, label = child, label .. "/" .. child.name
-      end
-      entries[#entries + 1] = { kind = "dir", depth = depth, label = label }
-      walk(dir, depth + 1)
-    end
-    table.sort(node.files, function(a, b)
-      return a.path < b.path
-    end)
-    for _, file in ipairs(node.files) do
-      ordered[#ordered + 1] = file
-      entries[#entries + 1] = { kind = "file", depth = depth, index = #ordered }
-    end
+  table.sort(files, function(a, b)
+    return a.path < b.path
+  end)
+  for _, file in ipairs(files) do
+    ordered[#ordered + 1] = file
+    entries[#entries + 1] = { kind = "file", index = #ordered }
   end
-  walk(root, 0)
   return entries, ordered
 end
 
@@ -256,72 +228,6 @@ local function build_model(old_text, new_text)
   model.folds = compute_folds(model.rows)
   model.number_width = #tostring(math.max(#old_lines, #new_lines, 1))
   return model
-end
-
--- Map the line ranges changed by one agent write onto the current HEAD diff.
--- Agent events identify a file but not a line range, so compare snapshots taken
--- while the review is open to locate the hunk that changed in this write.
-local function latest_edit_row(model, previous_text, current_text)
-  local edits = vim.text.diff(previous_text, current_text, diff_options)
-  local result
-
-  -- TODO(poc): the file-edited event gives us no line/range metadata, so if a
-  -- single write changes several separate ranges, use the last diff range as
-  -- the best available proxy for the most recently edited hunk.
-  for _, edit in ipairs(edits or {}) do
-    local old_start, old_count, new_start, new_count = edit[1], edit[2], edit[3], edit[4]
-    old_start, new_start = diff_starts(old_start, old_count, new_start, new_count)
-    if new_count > 0 then
-      local best, best_distance
-      for row, info in ipairs(model.rows) do
-        if info.new and info.hunk then
-          local distance = info.new < new_start and new_start - info.new
-            or info.new >= new_start + new_count and info.new - (new_start + new_count - 1)
-            or 0
-          if not best_distance or distance < best_distance then
-            best, best_distance = info.hunk, distance
-          end
-        end
-      end
-      if best then result = best end
-    elseif old_count > 0 then
-      -- A deletion has no new-side row. Locate its insertion boundary among
-      -- the surviving lines around each deleted hunk instead of comparing
-      -- working-tree line numbers to HEAD's old-side line numbers.
-      local ranges = {}
-      for row, info in ipairs(model.rows) do
-        if info.hunk then
-          local range = ranges[info.hunk] or { first = row, last = row }
-          range.first, range.last = math.min(range.first, row), math.max(range.last, row)
-          ranges[info.hunk] = range
-        end
-      end
-      local best, best_distance
-      for hunk, range in pairs(ranges) do
-        local before, after
-        for row = range.first - 1, 1, -1 do
-          if model.rows[row].new then before = model.rows[row].new; break end
-        end
-        for row = range.last + 1, #model.rows do
-          if model.rows[row].new then after = model.rows[row].new; break end
-        end
-        local distance = before and new_start < before and before - new_start
-          or after and new_start > after and new_start - after
-          or 0
-        if not best_distance or distance < best_distance then
-          best, best_distance = hunk, distance
-        end
-      end
-      if best then result = best end
-    end
-  end
-
-  if not result then return nil end
-  for row, info in ipairs(model.rows) do
-    if info.hunk == result and row_highlights[info.kind] then
-      return row
-    end
-  end
 end
 
 local function git_result(args, cwd)
@@ -555,27 +461,19 @@ local function render_panel(review)
   add(("(%d)"):format(#review.files), "AgentChangesPanelCounter"); newline()
 
   for _, entry in ipairs(review.entries) do
-    if entry.kind == "dir" then
-      add("  " .. string.rep(" ", entry.depth * 2))
-      add(icons.fold_open, "AgentChangesPanelNonText")
-      add(" " .. icons.folder_open .. " ", "AgentChangesPanelFolderSign")
-      add(entry.label, "AgentChangesPanelFolderName")
+    local file = review.files[entry.index]
+    panel.row_to_file[#lines + 1] = entry.index
+    panel.file_to_row[entry.index] = #lines + 1
+    add(file.status .. "  ", status_highlights[file.status])
+    local icon, icon_hl = get_file_icon(file.path)
+    if icon then add(icon .. " ", icon_hl) end
+    add(vim.fs.basename(file.path), entry.index == review.index and "AgentChangesPanelSelected" or "AgentChangesPanelFileName")
+    if file.binary then
+      add(" -", "AgentChangesPanelNonText")
     else
-      local file = review.files[entry.index]
-      panel.row_to_file[#lines + 1] = entry.index
-      panel.file_to_row[entry.index] = #lines + 1
-      add(file.status .. " ", status_highlights[file.status])
-      add(string.rep(" ", entry.depth * 2 + 2))
-      local icon, icon_hl = get_file_icon(file.path)
-      if icon then add(icon .. " ", icon_hl) end
-      add(vim.fs.basename(file.path), entry.index == review.index and "AgentChangesPanelSelected" or "AgentChangesPanelFileName")
-      if file.binary then
-        add(" -", "AgentChangesPanelNonText")
-      else
-        add(" " .. tostring(file.additions), "AgentChangesPanelInsertions")
-        add(", ")
-        add(tostring(file.deletions), "AgentChangesPanelDeletions")
-      end
+      add(" " .. tostring(file.additions), "AgentChangesPanelInsertions")
+      add(", ")
+      add(tostring(file.deletions), "AgentChangesPanelDeletions")
     end
     newline()
   end
@@ -629,13 +527,16 @@ local function set_common_keymaps(review, buf)
   map(buf, "<S-Tab>", function() select_offset(review, -1) end, "Previous changed file")
   map(buf, "<leader>b", function()
     if review.panel and api.nvim_win_is_valid(review.panel.win) then
+      review.panel_preference = false
       close_panel(review)
       if api.nvim_win_is_valid(review.win) then api.nvim_set_current_win(review.win) end
     else
+      review.panel_preference = true
       open_panel(review)
     end
   end, "Toggle changed-files panel")
   map(buf, "<leader>e", function()
+    review.panel_preference = true
     open_panel(review)
     if review.panel then api.nvim_set_current_win(review.panel.win) end
   end, "Focus changed-files panel")
@@ -645,6 +546,7 @@ local function set_common_keymaps(review, buf)
 end
 
 open_panel = function(review)
+  if #review.files <= 1 then return end
   if review.panel and api.nvim_win_is_valid(review.panel.win) then return end
   local buf = api.nvim_create_buf(false, true)
   vim.bo[buf].bufhidden = "wipe"
@@ -759,13 +661,8 @@ load_file = function(review, index)
     model = build_model(file.old_text, new_text)
       or message_model({ ("No textual changes in %s."):format(file.path) })
   end
-  local target_row
-  local latest_edit = review.latest_edit
-  if latest_edit and latest_edit.path == file.path then
-    target_row = latest_edit_row(model, latest_edit.old_text, latest_edit.new_text)
-  end
-  render_diff(review, model, file, preserve_cursor and not target_row, target_row)
-  if not target_row and review.resume_bookmark and review.resume_bookmark.selected_path == file.path then
+  render_diff(review, model, file, preserve_cursor)
+  if review.resume_bookmark and review.resume_bookmark.selected_path == file.path then
     local bm = review.resume_bookmark
     if bm.cursor then
       local row = bm.cursor[1]
@@ -811,14 +708,14 @@ end
 
 local function reset_unit_state(review)
   review.snapshots = {}
-  review.latest_edit = nil
+  review.latest_edit_path = nil
   review.resume_bookmark = nil
 end
 
 refresh = function(review)
   local selected = review.files[review.index or 0]
   local selected_path = (review.resume_bookmark and review.resume_bookmark.selected_path)
-    or (review.latest_edit and review.latest_edit.path)
+    or review.latest_edit_path
     or (selected and selected.path)
   local cwd = vim.fn.getcwd()
   local source = api.nvim_buf_is_valid(review.previous_buf) and api.nvim_buf_get_name(review.previous_buf) or ""
@@ -853,9 +750,13 @@ refresh = function(review)
   end
 
   review.entries, review.files = build_entries(files)
+  if #review.files > 1 and review.panel_preference then
+    open_panel(review)
+  else
+    close_panel(review)
+  end
   if #review.files == 0 then
     review.index = nil
-    render_panel(review)
     return show_message(review, { "No changes in the current unit." })
   end
   local index = 1
@@ -883,6 +784,7 @@ local function create_review(tabpage, win, opts)
     augroup = api.nvim_create_augroup(("AgentChanges_%d"):format(tabpage), { clear = true }),
     saved_window_options = {},
     resume_bookmark = opts,
+    panel_preference = not opts or opts.panel_open ~= false,
   }
   for _, setting in ipairs(review_window_settings) do
     local name, value = setting[1], setting[2]
@@ -906,9 +808,6 @@ local function create_review(tabpage, win, opts)
   api.nvim_create_autocmd("BufWinLeave", {
     group = review.augroup, buffer = buf, callback = schedule_close,
   })
-  if not opts or opts.panel_open ~= false then
-    open_panel(review)
-  end
   api.nvim_set_current_win(win)
   refresh(review)
 end
@@ -954,7 +853,7 @@ local function update_review_for_file(review, changed_path)
   if previous_text == current_text then return end
 
   review.snapshots[path] = current_text
-  review.latest_edit = { path = path, old_text = previous_text, new_text = current_text }
+  review.latest_edit_path = path
   refresh(review)
 end
 
