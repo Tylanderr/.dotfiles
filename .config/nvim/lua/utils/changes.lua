@@ -800,7 +800,11 @@ local function create_review(tabpage, win, opts)
   map(buf, "gf", function() goto_file(review) end, "Open file at cursor line")
 
   local function schedule_close()
-    vim.schedule(function() close_review(review) end)
+    vim.schedule(function()
+      if reviews[review.tabpage] ~= review or review.suspended then return end
+      if api.nvim_win_is_valid(review.win) and api.nvim_win_get_buf(review.win) == review.buf then return end
+      close_review(review)
+    end)
   end
   api.nvim_create_autocmd("WinClosed", {
     group = review.augroup, pattern = tostring(win), callback = schedule_close,
@@ -810,6 +814,47 @@ local function create_review(tabpage, win, opts)
   })
   api.nvim_set_current_win(win)
   refresh(review)
+end
+
+function M.suspend(buf)
+  for _, review in pairs(reviews) do
+    if review.buf == buf then
+      review.suspended = true
+      if api.nvim_win_is_valid(review.win) then
+        for name, value in pairs(review.saved_window_options) do
+          pcall(function() vim.wo[review.win][name] = value end)
+        end
+      end
+      return
+    end
+  end
+end
+
+function M.resume(buf)
+  for _, review in pairs(reviews) do
+    if review.buf == buf then
+      review.suspended = false
+      if api.nvim_win_is_valid(review.win) and api.nvim_win_get_buf(review.win) == review.buf then
+        for _, setting in ipairs(review_window_settings) do
+          local name, value = setting[1], setting[2]
+          pcall(function() vim.wo[review.win][name] = value end)
+        end
+      end
+      return
+    end
+  end
+end
+
+function M.abandon(buf)
+  for _, review in pairs(reviews) do
+    if review.buf == buf then
+      close_review(review)
+      if api.nvim_buf_is_valid(buf) then
+        pcall(api.nvim_buf_delete, buf, { force = true })
+      end
+      return
+    end
+  end
 end
 
 function M.statuscolumn()
